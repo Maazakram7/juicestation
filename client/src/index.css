@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset + base typography */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-brand-cream text-brand-charcoal font-sans transition-colors duration-500;
+    font-feature-settings: 'ss01', 'ss02', 'kern';
+    letter-spacing: -0.01em;
+  }
+
+  .dark body {
+    @apply bg-brand-charcoal text-brand-cream;
+  }
+
+  h1, h2, h3 {
+    @apply font-display tracking-tight;
+    letter-spacing: -0.035em;
+    font-weight: 500;
+  }
+
+  /* Italic accent replacement — underline-style motion accent
+     since Neue Montreal has no true italic character */
+  em {
+    @apply not-italic relative inline-block;
+    color: #5A9A2E;
+  }
+  .dark em { color: #7DC242; }
+
+  /* Custom selection */
+  ::selection {
+    @apply bg-brand-green text-white;
+  }
+}
+
+@layer components {
+  /* Premium button — quiet gravity */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full
+           bg-brand-green text-white font-medium text-sm tracking-wide
+           transition-all duration-300 ease-out
+           hover:bg-brand-green-deep hover:scale-[1.02] hover:shadow-lg hover:shadow-brand-green/25
+           active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full
+           border font-medium text-sm tracking-wide
+           transition-all duration-300 ease-out
+           hover:scale-[1.02] active:scale-[0.98];
+    border-color: rgb(0 0 0 / 0.15);
+  }
+  .dark .btn-ghost { border-color: rgb(255 255 255 / 0.15); }
+  .btn-ghost:hover { border-color: rgb(0 0 0 / 0.35); }
+  .dark .btn-ghost:hover { border-color: rgb(255 255 255 / 0.35); }
+
+  /* Section padding */
+  .section {
+    @apply px-6 md:px-12 lg:px-20 py-24 md:py-32;
+  }
+
+  /* Subtle grain overlay for atmosphere */
+  .grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+}
+
+/* Scrollbar — subtle, dark-mode aware */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(125, 194, 66, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(125, 194, 66, 0.6); }
+
+/* Disable scrubbing motion for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
