@@ -49,11 +49,18 @@ export default function Checkout() {
         }),
       });
 
-      if (!res.ok) throw new Error('Order failed — please try again.');
+      if (!res.ok) {
+        const { error: msg } = await res.json().catch(() => ({}));
+        throw new Error(msg || 'Order failed — please try again.');
+      }
       const data = await res.json();
 
+      if (!data.checkout_url) {
+        throw new Error('No payment URL returned.');
+      }
+
       clear();
-      navigate(`/order-success?id=${encodeURIComponent(data.order_id)}`);
+      window.location.href = data.checkout_url;
     } catch (err) {
       setError(err.message);
     } finally {
@@ -111,7 +118,7 @@ export default function Checkout() {
               disabled={submitting}
               className="btn-primary w-full mt-6 disabled:opacity-50"
             >
-              {submitting ? 'Placing order…' : `Place order · £${total.toFixed(2)}`}
+              {submitting ? 'Redirecting to payment…' : `Pay £${total.toFixed(2)} securely`}
               {!submitting && <span>→</span>}
             </button>
             <p className="text-xs opacity-50 text-center mt-2">
