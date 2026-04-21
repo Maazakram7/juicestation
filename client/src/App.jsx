@@ -1,3 +1,4 @@
+import PasswordGate from './components/PasswordGate';
 import ScrollToTop from './components/ScrollToTop';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -28,23 +29,25 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <>
-      <ScrollToTop />
-      <Navbar />
-      <CartDrawer />
-      <main className="min-h-screen">
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<PageTransition><Home /></PageTransition>} />
-            <Route path="/menu" element={<PageTransition><Menu /></PageTransition>} />
-            <Route path="/builder" element={<PageTransition><Builder /></PageTransition>} />
-            <Route path="/subscribe" element={<PageTransition><Subscribe /></PageTransition>} />
-            <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
-            <Route path="/order-success" element={<PageTransition><OrderSuccess /></PageTransition>} />
-          </Routes>
-        </AnimatePresence>
-      </main>
-      <Footer />
-    </>
+    <PasswordGate>
+      <>
+        <ScrollToTop />
+        <Navbar />
+        <CartDrawer />
+        <main className="min-h-screen">
+          <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+              <Route path="/menu" element={<PageTransition><Menu /></PageTransition>} />
+              <Route path="/builder" element={<PageTransition><Builder /></PageTransition>} />
+              <Route path="/subscribe" element={<PageTransition><Subscribe /></PageTransition>} />
+              <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
+              <Route path="/order-success" element={<PageTransition><OrderSuccess /></PageTransition>} />
+            </Routes>
+          </AnimatePresence>
+        </main>
+        <Footer />
+      </>
+    </PasswordGate>
   );
 }
