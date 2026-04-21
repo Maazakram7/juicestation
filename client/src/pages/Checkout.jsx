@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
@@ -19,6 +19,12 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Warm up the backend on page load — Render free tier cold-starts
+  // after 15 mins of inactivity and can take 30-60s to wake up.
+  useEffect(() => {
+    fetch(`${API_URL}/`).catch(() => {});
+  }, []);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -29,10 +35,6 @@ export default function Checkout() {
     setError(null);
 
     try {
-      // NOTE (Stripe integration point):
-      // Before hitting /order, you'd create a Stripe PaymentIntent here
-      // and confirm payment with stripe.confirmCardPayment(). On success,
-      // forward the paymentIntent.id as payment_intent_id below.
       const res = await fetch(`${API_URL}/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,7 +65,6 @@ export default function Checkout() {
       window.location.href = data.checkout_url;
     } catch (err) {
       setError(err.message);
-    } finally {
       setSubmitting(false);
     }
   };
@@ -72,8 +73,8 @@ export default function Checkout() {
     return (
       <div className="pt-40 pb-24 px-6 text-center max-w-xl mx-auto">
         <div className="text-6xl mb-6 opacity-30">🧃</div>
-        <h1 className="font-display text-4xl mb-4">Cart's empty.</h1>
-        <p className="opacity-60 mb-8">You'll want something in it before checking out.</p>
+        <h1 className="font-display text-4xl mb-4">Cart&apos;s empty.</h1>
+        <p className="opacity-60 mb-8">You&apos;ll want something in it before checking out.</p>
         <Link to="/menu" className="btn-primary">Browse the menu</Link>
       </div>
     );
@@ -95,7 +96,6 @@ export default function Checkout() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Form */}
           <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-4">
             <Field label="Name" name="name" value={form.name} onChange={handleChange} required />
             <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} required />
@@ -116,17 +116,34 @@ export default function Checkout() {
             <button
               type="submit"
               disabled={submitting}
-              className="btn-primary w-full mt-6 disabled:opacity-50"
+              className="btn-primary w-full mt-6 disabled:opacity-70 disabled:cursor-wait"
             >
-              {submitting ? 'Redirecting to payment…' : `Pay £${total.toFixed(2)} securely`}
-              {!submitting && <span>→</span>}
+              {submitting ? (
+                <>
+                  <svg
+                    className="animate-spin w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  >
+                    <path d="M21 12a9 9 0 11-6.219-8.56" />
+                  </svg>
+                  Redirecting to Stripe…
+                </>
+              ) : (
+                <>
+                  Pay £{total.toFixed(2)} securely
+                  <span>→</span>
+                </>
+              )}
             </button>
             <p className="text-xs opacity-50 text-center mt-2">
-              Payment processed securely. Stripe integration ready — currently in mock mode.
+              Secure payment powered by Stripe.
             </p>
           </form>
 
-          {/* Summary */}
           <aside className="lg:col-span-5">
             <div className="lg:sticky lg:top-28 rounded-[28px] bg-white border border-black/[0.06] p-6 md:p-8">
               <h3 className="font-display text-xl mb-6">Your order</h3>
