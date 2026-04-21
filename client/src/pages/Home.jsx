@@ -101,7 +101,8 @@ export default function Home() {
 
       <ScrollStory />
 
-      <section className="section bg-brand-cream">
+      {/* FEATURED JUICES */}
+      <section className="section bg-brand-cream pt-8 md:pt-32">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-12 md:mb-20 flex-wrap gap-6">
             <motion.div

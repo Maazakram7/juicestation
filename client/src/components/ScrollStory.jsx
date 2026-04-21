@@ -12,7 +12,6 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Desktop word reveal — scroll-linked per word with spring smoothing
 function WordReveal({ children, progress, range, accent = false }) {
   const [start, end] = range;
   const y = useTransform(progress, [start, end], [80, 0]);
@@ -35,23 +34,20 @@ function WordReveal({ children, progress, range, accent = false }) {
   );
 }
 
-// Mobile: section pins, timer-based line sequencer plays on fixed schedule
 function MobileSequencer() {
   const sectionRef = useRef(null);
-  const [phase, setPhase] = useState(-1); // -1 = not started, 0-3 = showing line N
+  const [phase, setPhase] = useState(-1);
   const [inView, setInView] = useState(false);
 
-  // Each line displays for this long, including fade transitions
-  const LINE_DURATION = 1800; // ms per line
+  const LINE_DURATION = 1800;
 
   const lines = [
-    { text: 'Fresh fruit.', color: 'rgba(125, 194, 66, 0.22)', accent: false },
-    { text: 'Raw vegetables.', color: 'rgba(243, 147, 36, 0.20)', accent: true },
-    { text: 'Nothing added.', color: 'rgba(233, 78, 78, 0.18)', accent: false },
-    { text: 'Nothing hidden.', color: 'rgba(125, 194, 66, 0.22)', accent: true },
+    { text: 'Fresh fruit.', accent: false },
+    { text: 'Raw vegetables.', accent: true },
+    { text: 'Nothing added.', accent: false },
+    { text: 'Nothing hidden.', accent: true },
   ];
 
-  // Observe when section enters viewport
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -59,9 +55,10 @@ function MobileSequencer() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // Trigger when the pinned content is centered in view
           if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
             setInView(true);
+          } else if (!entry.isIntersecting) {
+            setInView(false);
           }
         });
       },
@@ -71,21 +68,18 @@ function MobileSequencer() {
     return () => observer.disconnect();
   }, []);
 
-  // Once in view, sequence through the lines on a fixed schedule
   useEffect(() => {
     if (!inView) return;
 
+    let currentPhase = 0;
     setPhase(0);
-    const timers = [];
 
-    lines.forEach((_, i) => {
-      if (i === 0) return; // phase 0 is already set
-      timers.push(
-        setTimeout(() => setPhase(i), i * LINE_DURATION)
-      );
-    });
+    const interval = setInterval(() => {
+      currentPhase = (currentPhase + 1) % lines.length;
+      setPhase(currentPhase);
+    }, LINE_DURATION);
 
-    return () => timers.forEach(clearTimeout);
+    return () => clearInterval(interval);
   }, [inView]);
 
   const currentLine = phase >= 0 ? lines[phase] : null;
@@ -93,30 +87,13 @@ function MobileSequencer() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-brand-cream h-[100vh] overflow-hidden"
+      className="relative bg-brand-cream h-[60vh] overflow-hidden"
       aria-label="Fresh ingredients, cold-pressed"
     >
-      {/* Top label strip */}
       <div className="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-5 pt-10 text-[9px] uppercase tracking-[0.3em] opacity-50">
         <span>The Process</span>
       </div>
 
-      {/* Ambient glow — color changes smoothly with each phrase */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-        <motion.div
-          className="w-[130%] h-[70%] rounded-full"
-          animate={{
-            backgroundColor: currentLine ? currentLine.color : 'rgba(125, 194, 66, 0.15)',
-            scale: [1, 1.03, 1],
-          }}
-          transition={{
-            backgroundColor: { duration: 1.2, ease: 'easeInOut' },
-            scale: { duration: 12, repeat: Infinity, ease: 'easeInOut' },
-          }}
-        />
-      </div>
-
-      {/* Line stack — each fades in/out on its own timer, independent of scroll */}
       <div className="absolute inset-0 z-20">
         <AnimatePresence mode="wait">
           {currentLine && (
@@ -129,37 +106,21 @@ function MobileSequencer() {
                 duration: 0.8,
                 ease: [0.2, 0.8, 0.2, 1],
               }}
-              className={`absolute inset-0 flex items-center justify-center px-6 ${
-                currentLine.accent ? 'text-brand-green-deep' : ''
-              }`}
+              className="absolute inset-0 flex items-center justify-center px-6"
             >
-              <h2 className="font-display text-center text-[14vw] leading-[1.05] tracking-tight max-w-[12ch]">
-                {currentLine.text}
+              <h2 className="font-display text-center text-[18vw] leading-[0.95] tracking-[-0.03em] max-w-[10ch]">
+                {currentLine.accent ? <em className="not-italic">{currentLine.text}</em> : currentLine.text}
               </h2>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Dot progress indicators */}
-      <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center gap-2">
-        {lines.map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              opacity: phase === i ? 1 : 0.2,
-              scale: phase === i ? 1.3 : 0.8,
-            }}
-            transition={{ duration: 0.4 }}
-            className="w-1.5 h-1.5 rounded-full bg-brand-charcoal"
-          />
-        ))}
-      </div>
+      
     </section>
   );
 }
 
-// Desktop version — scroll-linked (unchanged)
 function DesktopScrollStory() {
   const sectionRef = useRef(null);
 
