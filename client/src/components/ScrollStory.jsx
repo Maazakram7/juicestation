@@ -1,21 +1,20 @@
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
-/**
- * ScrollStory — text-only pinned scroll narrative.
- *
- * No fruits, no bottles, no illustrations. Just:
- *  - pinned sticky section
- *  - word-by-word headline reveal synced to scroll progress
- *  - ambient rotating glow behind the text
- *  - ingredient marquee pinned at the bottom
- *  - scroll progress bar
- *
- * This keeps the Oryzo-style motion vocabulary but leans entirely on typography.
- */
+// Detect mobile once on mount
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.matchMedia('(max-width: 768px)').matches);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  return isMobile;
+}
 
-// Word reveal tied to scroll progress
-function WordReveal({ children, progress, range, accent = false }) {
+// Desktop: scroll-linked word reveal
+function WordRevealDesktop({ children, progress, range, accent = false }) {
   const [start, end] = range;
   const y = useTransform(progress, [start, end], [80, 0]);
   const opacity = useTransform(progress, [start, start + (end - start) * 0.4, end], [0, 0.5, 1]);
@@ -33,9 +32,28 @@ function WordReveal({ children, progress, range, accent = false }) {
   );
 }
 
+// Mobile: simple stagger fade-in (no scroll-linking)
+function WordRevealMobile({ children, delay, accent = false }) {
+  return (
+    <span className="inline-block overflow-hidden align-bottom mr-2">
+      <motion.span
+        initial={{ y: 40, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.7, delay, ease: [0.2, 0.8, 0.2, 1] }}
+        className={`inline-block ${accent ? 'text-brand-green-deep dark:text-brand-green' : ''}`}
+      >
+        {children}
+      </motion.span>
+    </span>
+  );
+}
+
 export default function ScrollStory() {
+  const isMobile = useIsMobile();
   const sectionRef = useRef(null);
 
+  // Only compute scroll progress on desktop (avoids expensive mobile work)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end end'],
@@ -51,6 +69,53 @@ export default function ScrollStory() {
   const progressWidth = useTransform(smoothProgress, [0, 1], ['0%', '100%']);
   const bgRotate = useTransform(smoothProgress, [0, 1], [0, 200]);
 
+  // Mobile: tighter section, simpler layout
+  if (isMobile) {
+    return (
+      <section className="relative bg-brand-cream dark:bg-brand-charcoal py-24 px-6 overflow-hidden">
+        {/* Top label */}
+        <div className="flex justify-between items-center mb-12 text-[10px] uppercase tracking-[0.3em] opacity-50">
+          <span>The Process</span>
+          <span className="font-mono">Fresh · Raw · Cold-pressed</span>
+        </div>
+
+        {/* Static subtle gradient (no rotation, much cheaper) */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          aria-hidden="true"
+        >
+          <div
+            className="w-[120%] h-[60%] rounded-full opacity-15"
+            style={{ background: 'radial-gradient(circle, #7DC242, transparent 70%)', filter: 'blur(40px)' }}
+          />
+        </div>
+
+        {/* Headline — staggered fade-in instead of scroll-linked */}
+        <div className="relative z-10">
+          <h2 className="font-display text-center text-[11vw] leading-[1] tracking-tight">
+            <WordRevealMobile delay={0}>Fresh</WordRevealMobile>
+            <WordRevealMobile delay={0.1}>fruit.</WordRevealMobile>
+            <br />
+            <WordRevealMobile delay={0.25}>Raw</WordRevealMobile>
+            <WordRevealMobile delay={0.35} accent>vegetables.</WordRevealMobile>
+            <br />
+            <WordRevealMobile delay={0.5}>Nothing</WordRevealMobile>
+            <WordRevealMobile delay={0.6}>added.</WordRevealMobile>
+            <br />
+            <WordRevealMobile delay={0.75}>Nothing</WordRevealMobile>
+            <WordRevealMobile delay={0.85} accent>hidden.</WordRevealMobile>
+          </h2>
+        </div>
+
+        {/* Static ingredient line (no marquee animation) */}
+        <div className="mt-16 overflow-hidden whitespace-nowrap text-[10px] uppercase tracking-[0.3em] opacity-30 text-center">
+          carrot · beetroot · apple · ginger · lemon · kale · spinach · orange · mint
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop: original scroll-linked version (unchanged)
   return (
     <section
       ref={sectionRef}
@@ -59,13 +124,11 @@ export default function ScrollStory() {
       aria-label="Fresh ingredients, cold-pressed"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        {/* Top label strip */}
         <div className="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 md:px-10 pt-24 md:pt-28 text-xs uppercase tracking-[0.3em] opacity-50">
           <span>The Process</span>
           <span className="font-mono">Fresh · Raw · Cold-pressed</span>
         </div>
 
-        {/* Ambient rotating glow — only visual decoration */}
         <motion.div
           style={{ rotate: bgRotate }}
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
@@ -77,24 +140,22 @@ export default function ScrollStory() {
           />
         </motion.div>
 
-        {/* Centered headline — slightly smaller type than before */}
         <div className="relative z-20 h-full flex items-center justify-center px-6 md:px-10">
           <h2 className="font-display text-center text-[10vw] md:text-[7vw] lg:text-[6vw] leading-[0.95] tracking-tight max-w-[18ch]">
-            <WordReveal progress={smoothProgress} range={[0.00, 0.12]}>Fresh</WordReveal>
-            <WordReveal progress={smoothProgress} range={[0.05, 0.17]}>fruit.</WordReveal>
+            <WordRevealDesktop progress={smoothProgress} range={[0.0, 0.12]}>Fresh</WordRevealDesktop>
+            <WordRevealDesktop progress={smoothProgress} range={[0.05, 0.17]}>fruit.</WordRevealDesktop>
             <br />
-            <WordReveal progress={smoothProgress} range={[0.22, 0.34]}>Raw</WordReveal>
-            <WordReveal progress={smoothProgress} range={[0.27, 0.39]} accent>vegetables.</WordReveal>
+            <WordRevealDesktop progress={smoothProgress} range={[0.22, 0.34]}>Raw</WordRevealDesktop>
+            <WordRevealDesktop progress={smoothProgress} range={[0.27, 0.39]} accent>vegetables.</WordRevealDesktop>
             <br />
-            <WordReveal progress={smoothProgress} range={[0.50, 0.62]}>Nothing</WordReveal>
-            <WordReveal progress={smoothProgress} range={[0.55, 0.67]}>added.</WordReveal>
+            <WordRevealDesktop progress={smoothProgress} range={[0.5, 0.62]}>Nothing</WordRevealDesktop>
+            <WordRevealDesktop progress={smoothProgress} range={[0.55, 0.67]}>added.</WordRevealDesktop>
             <br />
-            <WordReveal progress={smoothProgress} range={[0.78, 0.90]}>Nothing</WordReveal>
-            <WordReveal progress={smoothProgress} range={[0.83, 0.95]} accent>hidden.</WordReveal>
+            <WordRevealDesktop progress={smoothProgress} range={[0.78, 0.9]}>Nothing</WordRevealDesktop>
+            <WordRevealDesktop progress={smoothProgress} range={[0.83, 0.95]} accent>hidden.</WordRevealDesktop>
           </h2>
         </div>
 
-        {/* Ingredient marquee — pinned at bottom, slides with scroll */}
         <motion.div
           style={{ x: marqueeX }}
           className="absolute bottom-10 md:bottom-14 left-0 right-0 z-20 whitespace-nowrap pointer-events-none select-none"
@@ -116,7 +177,6 @@ export default function ScrollStory() {
           </div>
         </motion.div>
 
-        {/* Progress bar */}
         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black/5 dark:bg-white/5 z-30">
           <motion.div style={{ width: progressWidth }} className="h-full bg-brand-green" />
         </div>
