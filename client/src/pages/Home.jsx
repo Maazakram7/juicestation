@@ -5,7 +5,6 @@ import Testimonials from '../components/Testimonials';
 import JuiceCard from '../components/JuiceCard';
 import { MENU } from '../data/menu';
 
-// Animated headline splits the phrase into words for stagger reveal
 const HEADLINE = ['Pure.', 'Fresh.', 'No compromise.'];
 
 export default function Home() {
@@ -13,9 +12,7 @@ export default function Home() {
 
   return (
     <>
-      {/* HERO */}
       <section className="relative min-h-[85vh] md:min-h-screen flex items-start md:items-center overflow-hidden pt-28 md:pt-20 pb-6 md:pb-0">
-        {/* Ambient background video, low opacity */}
         <video
           src="/hero.mp4"
           autoPlay
@@ -26,7 +23,6 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-brand-cream/70 via-brand-cream/40 to-brand-cream dark:from-brand-charcoal/70 dark:via-brand-charcoal/60 dark:to-brand-charcoal" />
 
-        {/* Floating decorative elements */}
         <motion.div
           animate={{ y: [0, -20, 0], rotate: [0, 4, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
@@ -49,8 +45,8 @@ export default function Home() {
           </motion.p>
 
           <h1 className="font-display text-[14vw] md:text-[9vw] lg:text-[7.5vw] leading-[0.9] tracking-tighter max-w-[18ch]">
-  {HEADLINE.map((word, i) => (
-    <span key={i} className="block overflow-hidden align-bottom">
+            {HEADLINE.map((word, i) => (
+              <span key={i} className="block overflow-hidden align-bottom">
                 <motion.span
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}
@@ -61,11 +57,7 @@ export default function Home() {
                   }}
                   className="inline-block"
                 >
-                  {i === 2 ? (
-                    <em>{word}</em>
-                  ) : (
-                    word
-                  )}
+                  {i === 2 ? <em>{word}</em> : word}
                 </motion.span>
               </span>
             ))}
@@ -75,18 +67,17 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="mt-12 flex flex-col sm:flex-row gap-4 items-start"
+            className="mt-12 flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch sm:items-start max-w-xs sm:max-w-none"
           >
-            <Link to="/menu" className="btn-primary">
+            <Link to="/menu" className="btn-primary w-full sm:w-auto">
               Order now
               <span>→</span>
             </Link>
-            <Link to="/subscribe" className="btn-ghost">
+            <Link to="/subscribe" className="btn-ghost w-full sm:w-auto">
               Subscribe weekly
             </Link>
           </motion.div>
 
-          {/* USP strip */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -98,7 +89,7 @@ export default function Home() {
               ['No sugar', 'None added.'],
               ['No additives', 'You read that right.'],
               ['Cold-pressed', 'Every morning.'],
-            ].map(([label, sub], i) => (
+            ].map(([label, sub]) => (
               <div key={label}>
                 <p className="font-medium">{label}</p>
                 <p className="text-xs opacity-60 mt-0.5">{sub}</p>
@@ -108,10 +99,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SCROLL-DRIVEN STORY */}
       <ScrollStory />
 
-      {/* FEATURED JUICES */}
       <section className="section bg-brand-cream dark:bg-brand-charcoal">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-12 md:mb-20 flex-wrap gap-6">
@@ -143,10 +132,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
       <Testimonials />
 
-      {/* CTA */}
       <section className="section bg-brand-green relative overflow-hidden">
         <div className="absolute inset-0 grain" />
         <div className="relative max-w-5xl mx-auto text-center">
