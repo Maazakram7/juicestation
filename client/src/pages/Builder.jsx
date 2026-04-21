@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import { INGREDIENTS, BASE_CUSTOM_PRICE, MAX_CUSTOM_INGREDIENTS } from '../data/menu';
+import { INGREDIENTS, BASE_CUSTOM_PRICE, MAX_CUSTOM_INGREDIENTS, CUSTOM_SIZE_UPCHARGE } from '../data/menu';
 import { useCart } from '../context/CartContext';
 
 function IngredientTile({ ing, index, isSelected, onToggle }) {
@@ -17,8 +17,8 @@ function IngredientTile({ ing, index, isSelected, onToggle }) {
         transition={{ duration: 0.2 }}
         className={`relative w-full rounded-2xl md:rounded-3xl p-3 md:p-5 text-left transition-colors duration-300 overflow-hidden aspect-[4/5] sm:aspect-square ${
           isSelected
-            ? 'ring-2 ring-offset-2 ring-offset-brand-cream dark:ring-offset-brand-charcoal ring-brand-green'
-            : 'border border-black/[0.08] dark:border-white/[0.08]'
+            ? 'ring-2 ring-offset-2 ring-offset-brand-cream ring-brand-green'
+            : 'border border-black/[0.08]'
         }`}
         style={{
           backgroundColor: isSelected ? `${ing.color}22` : undefined,
@@ -60,8 +60,34 @@ function IngredientTile({ ing, index, isSelected, onToggle }) {
   );
 }
 
+function SizeSelector({ size, onChange, total, small = false }) {
+  const sizes = ['S', 'M', 'L'];
+  return (
+    <div className={`flex items-center gap-1 p-1 rounded-full border border-current/15 ${small ? '' : 'w-full justify-center'}`}>
+      {sizes.map((s) => {
+        const diff = CUSTOM_SIZE_UPCHARGE[s] - CUSTOM_SIZE_UPCHARGE[size];
+        const thisTotal = total + diff;
+        return (
+          <button
+            key={s}
+            onClick={() => onChange(s)}
+            className={`${small ? 'text-[10px] px-2 py-1' : 'text-xs px-3 py-1.5 flex-1'} rounded-full transition-all tabular-nums tracking-wider ${
+              size === s
+                ? 'bg-brand-charcoal text-brand-cream'
+                : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            {s} · £{thisTotal.toFixed(2)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function Builder() {
   const [selected, setSelected] = useState([]);
+  const [size, setSize] = useState('M');
   const { add } = useCart();
   const [added, setAdded] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -71,7 +97,6 @@ export default function Builder() {
     const ing = INGREDIENTS.find((i) => i.id === id);
     if (!ing) return;
 
-    // Decide action FIRST, synchronously, outside of setState
     let action;
     let newSelected;
     if (selected.includes(id)) {
@@ -87,7 +112,6 @@ export default function Builder() {
 
     setSelected(newSelected);
 
-    // Queue the toast
     const toastId = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const newToast = { id: toastId, emoji: ing.emoji, name: ing.name, action };
     setToasts((prev) => [...prev, newToast]);
@@ -103,8 +127,9 @@ export default function Builder() {
       const ing = INGREDIENTS.find((i) => i.id === id);
       return acc + (ing?.price || 0);
     }, 0);
-    return sum + (selected.length > 0 ? BASE_CUSTOM_PRICE : 0);
-  }, [selected]);
+    if (selected.length === 0) return 0;
+    return sum + BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size];
+  }, [selected, size]);
 
   const handleAdd = () => {
     if (selected.length === 0) return;
@@ -113,7 +138,7 @@ export default function Builder() {
       .filter(Boolean);
     add({
       id: `custom-${Date.now()}`,
-      name: 'Custom juice',
+      name: `Custom juice (${size})`,
       price: total,
       meta: names.join(' · '),
     });
@@ -152,10 +177,10 @@ export default function Builder() {
           <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-[0.95]">
             Your juice,
             <br />
-            <em className="not-italic text-brand-green-deep dark:text-brand-green">your rules.</em>
+            <em className="not-italic text-brand-green-deep">your rules.</em>
           </h1>
           <p className="mt-4 md:mt-8 text-sm md:text-lg opacity-60 max-w-xl leading-relaxed">
-            Craft your perfect blend &mdash; select up to {MAX_CUSTOM_INGREDIENTS} ingredients from our full menu, then choose your size.
+            Craft your perfect blend &mdash; select up to {MAX_CUSTOM_INGREDIENTS} ingredients, pick your size, and we&apos;ll press it fresh.
           </p>
         </motion.div>
 
@@ -175,7 +200,7 @@ export default function Builder() {
           </div>
 
           <aside className="hidden lg:block lg:col-span-4">
-            <div className="lg:sticky lg:top-28 rounded-[28px] bg-white dark:bg-brand-ink border border-black/[0.06] dark:border-white/[0.06] p-6 md:p-8">
+            <div className="lg:sticky lg:top-28 rounded-[28px] bg-white border border-black/[0.06] p-6 md:p-8">
               <p className="text-xs uppercase tracking-[0.2em] opacity-50 mb-3">Your juice</p>
               <div className="flex items-baseline justify-between mb-6">
                 <h3 className="font-display text-3xl">
@@ -220,16 +245,24 @@ export default function Builder() {
                           </motion.li>
                         );
                       })}
-                      <li className="flex items-center justify-between text-sm pt-2 border-t border-black/5 dark:border-white/5">
-                        <span className="opacity-60">Bottle &amp; press</span>
-                        <span className="tabular-nums opacity-60">£{BASE_CUSTOM_PRICE.toFixed(2)}</span>
+                      <li className="flex items-center justify-between text-sm pt-2 border-t border-black/5">
+                        <span className="opacity-60">Bottle &amp; press ({size})</span>
+                        <span className="tabular-nums opacity-60">£{(BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size]).toFixed(2)}</span>
                       </li>
                     </ul>
                   )}
                 </AnimatePresence>
               </div>
 
-              <div className="flex items-baseline justify-between pt-4 border-t border-black/10 dark:border-white/10 mb-6">
+              {/* Size selector */}
+              {selected.length > 0 && (
+                <div className="mb-5">
+                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-2">Size</p>
+                  <SizeSelector size={size} onChange={setSize} total={total} />
+                </div>
+              )}
+
+              <div className="flex items-baseline justify-between pt-4 border-t border-black/10 mb-6">
                 <span className="text-sm opacity-60">Total</span>
                 <span className="font-display text-3xl tabular-nums">
                   £{total.toFixed(2)}
@@ -262,7 +295,7 @@ export default function Builder() {
         </div>
       </div>
 
-      {/* Toast stack — pure CSS, no framer-motion, no state coordination */}
+      {/* Toast stack */}
       <div className="fixed top-24 md:top-28 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center gap-2">
         {toasts.map((t) => (
           <div key={t.id} className="js-toast">
@@ -271,7 +304,7 @@ export default function Builder() {
                 t.action === 'added'
                   ? 'bg-brand-green text-white'
                   : t.action === 'removed'
-                  ? 'bg-brand-charcoal/90 dark:bg-brand-cream/90 text-brand-cream dark:text-brand-charcoal'
+                  ? 'bg-brand-charcoal/90 text-brand-cream'
                   : 'bg-brand-melon text-white'
               }`}
             >
@@ -313,7 +346,7 @@ export default function Builder() {
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: 20, opacity: 0 }}
                   transition={{ duration: 0.25 }}
-                  className="pointer-events-auto mx-3 mb-1 rounded-2xl bg-white dark:bg-brand-ink border border-black/[0.08] dark:border-white/[0.08] shadow-2xl p-4 max-h-[50vh] overflow-y-auto"
+                  className="pointer-events-auto mx-3 mb-1 rounded-2xl bg-white border border-black/[0.08] shadow-2xl p-4 max-h-[60vh] overflow-y-auto"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-[10px] uppercase tracking-[0.2em] opacity-50">Your juice</p>
@@ -324,7 +357,7 @@ export default function Builder() {
                       Close
                     </button>
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 mb-4">
                     {selected.map((id) => {
                       const ing = INGREDIENTS.find((i) => i.id === id);
                       return (
@@ -350,16 +383,22 @@ export default function Builder() {
                         </motion.li>
                       );
                     })}
-                    <li className="flex items-center justify-between text-xs pt-2 border-t border-black/5 dark:border-white/5">
-                      <span className="opacity-60">Bottle &amp; press</span>
-                      <span className="tabular-nums opacity-60">£{BASE_CUSTOM_PRICE.toFixed(2)}</span>
+                    <li className="flex items-center justify-between text-xs pt-2 border-t border-black/5">
+                      <span className="opacity-60">Bottle &amp; press ({size})</span>
+                      <span className="tabular-nums opacity-60">£{(BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size]).toFixed(2)}</span>
                     </li>
                   </ul>
+
+                  {/* Size selector in drawer */}
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-2">Size</p>
+                    <SizeSelector size={size} onChange={setSize} total={total} />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div className="pointer-events-auto mx-3 mb-3 rounded-full bg-brand-charcoal dark:bg-brand-cream text-brand-cream dark:text-brand-charcoal shadow-2xl flex items-center p-1.5 pl-5 gap-3">
+            <div className="pointer-events-auto mx-3 mb-3 rounded-full bg-brand-charcoal text-brand-cream shadow-2xl flex items-center p-1.5 pl-5 gap-3">
               <button
                 onClick={() => setMobileDrawerOpen((o) => !o)}
                 disabled={selected.length === 0}
@@ -367,7 +406,7 @@ export default function Builder() {
               >
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.2em] opacity-50">
-                    {added ? 'Added' : `${selected.length} ${selected.length === 1 ? 'item' : 'items'}`}
+                    {added ? 'Added' : `${selected.length} ${selected.length === 1 ? 'item' : 'items'} · ${size}`}
                   </p>
                   <p className="font-display text-lg tabular-nums">
                     {added ? '✓ in your cart' : `£${total.toFixed(2)}`}

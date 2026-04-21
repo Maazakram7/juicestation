@@ -40,7 +40,7 @@ const ROW_2 = REVIEWS.slice(12);
 
 function ReviewCard({ r }) {
   return (
-    <figure className="flex-shrink-0 w-[82vw] sm:w-[440px] md:w-[500px] mx-3 md:mx-4 px-7 md:px-8 py-7 md:py-8 rounded-[24px] bg-white dark:bg-brand-ink border border-black/[0.06] dark:border-white/[0.06]">
+    <figure className="flex-shrink-0 w-[82vw] sm:w-[440px] md:w-[500px] mx-3 md:mx-4 px-7 md:px-8 py-7 md:py-8 rounded-[24px] bg-white border border-black/[0.06]">
       <div className="flex items-center gap-0.5 mb-4" aria-label="5 star rating">
         {Array.from({ length: 5 }).map((_, i) => (
           <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#F39324">
@@ -80,7 +80,7 @@ function MarqueeRow({ items, reverse = false, duration = 80 }) {
 
 export default function Testimonials() {
   return (
-    <section className="relative pt-8 md:pt-12 pb-24 md:pb-32 bg-brand-cream dark:bg-brand-ink overflow-hidden">
+    <section className="relative pt-8 md:pt-12 pb-24 md:pb-32 bg-brand-cream overflow-hidden">
       {/* Heading */}
       <div className="max-w-7xl mx-auto px-6 md:px-10 mb-10 md:mb-14">
         <motion.div

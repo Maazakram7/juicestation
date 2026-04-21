@@ -128,7 +128,7 @@ export default function Checkout() {
 
           {/* Summary */}
           <aside className="lg:col-span-5">
-            <div className="lg:sticky lg:top-28 rounded-[28px] bg-white dark:bg-brand-ink border border-black/[0.06] dark:border-white/[0.06] p-6 md:p-8">
+            <div className="lg:sticky lg:top-28 rounded-[28px] bg-white border border-black/[0.06] p-6 md:p-8">
               <h3 className="font-display text-xl mb-6">Your order</h3>
               <ul className="space-y-3 mb-6">
                 {items.map((item) => (
@@ -145,7 +145,7 @@ export default function Checkout() {
                 ))}
               </ul>
 
-              <div className="pt-4 border-t border-black/10 dark:border-white/10 flex items-baseline justify-between">
+              <div className="pt-4 border-t border-black/10 flex items-baseline justify-between">
                 <span className="text-sm opacity-60">Total</span>
                 <span className="font-display text-2xl tabular-nums">£{total.toFixed(2)}</span>
               </div>
@@ -169,7 +169,7 @@ function Field({ label, name, value, onChange, type = 'text', textarea, required
         onChange={onChange}
         required={required}
         rows={textarea ? 3 : undefined}
-        className="w-full px-5 py-3.5 rounded-2xl bg-white dark:bg-brand-ink border border-black/[0.08] dark:border-white/[0.08] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 transition-all font-sans"
+        className="w-full px-5 py-3.5 rounded-2xl bg-white border border-black/[0.08] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 transition-all font-sans"
       />
     </label>
   );

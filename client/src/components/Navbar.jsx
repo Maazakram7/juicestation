@@ -2,7 +2,6 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useCart } from '../context/CartContext';
-import ThemeToggle from './ThemeToggle';
 
 const links = [
   { to: '/', label: 'Home' },
@@ -37,7 +36,7 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: 'easeOut' }}
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-brand-cream/80 dark:bg-brand-charcoal/80 backdrop-blur-xl border-b border-black/5 dark:border-white/5'
+          ? 'bg-brand-cream/80 backdrop-blur-xl border-b border-black/5'
           : 'bg-transparent'
       }`}
     >
@@ -47,7 +46,7 @@ export default function Navbar() {
           <img
             src="/logo.png"
             alt="JUICEeSTATION"
-            className="h-14 md:h-16 w-auto transition-transform duration-500 group-hover:scale-[1.03] dark:drop-shadow-[0_0_8px_rgba(125,194,66,0.2)]"
+            className="h-14 md:h-16 w-auto transition-transform duration-500 group-hover:scale-[1.03])]"
           />
         </Link>
 
@@ -61,7 +60,7 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `group relative px-4 py-2 text-sm font-medium tracking-wide rounded-full transition-all duration-300 ease-out hover:-translate-y-0.5 ${
                   isActive
-                    ? 'text-brand-green-deep dark:text-brand-green'
+                    ? 'text-brand-green-deep'
                     : 'opacity-70 hover:opacity-100'
                 }`
               }
@@ -83,7 +82,7 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <ThemeToggle />
+        
           <button
             id="cart-icon-target"
             onClick={toggle}
@@ -132,7 +131,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden bg-brand-cream/95 dark:bg-brand-charcoal/95 backdrop-blur-xl border-b border-black/5 dark:border-white/5"
+            className="md:hidden overflow-hidden bg-brand-cream/95 backdrop-blur-xl border-b border-black/5"
           >
             <div className="px-6 py-6 flex flex-col gap-1">
               {links.map((l) => (
@@ -142,7 +141,7 @@ export default function Navbar() {
                   end={l.to === '/'}
                   className={({ isActive }) =>
                     `py-3 text-lg font-display tracking-tight ${
-                      isActive ? 'text-brand-green-deep dark:text-brand-green' : 'opacity-80'
+                      isActive ? 'text-brand-green-deep' : 'opacity-80'
                     }`
                   }
                 >

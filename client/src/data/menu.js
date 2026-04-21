@@ -102,3 +102,5 @@ export const INGREDIENTS = [
 
 export const BASE_CUSTOM_PRICE = 2.00;
 export const MAX_CUSTOM_INGREDIENTS = 5;
+
+export const CUSTOM_SIZE_UPCHARGE = { S: 0, M: 1, L: 2 };

@@ -96,7 +96,7 @@ function CategoryPill({ label, active, onClick }) {
       onClick={onClick}
       className={`px-5 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all ${
         active
-          ? 'bg-brand-charcoal dark:bg-brand-cream text-brand-cream dark:text-brand-charcoal'
+          ? 'bg-brand-charcoal text-brand-cream'
           : 'border border-current/15 hover:border-current/40 opacity-70 hover:opacity-100'
       }`}
     >

@@ -226,7 +226,7 @@ export default function Subscribe() {
 
                 {/* Sticky summary */}
                 <aside className="lg:col-span-5">
-                  <div className="lg:sticky lg:top-28 rounded-[28px] bg-white dark:bg-brand-ink border border-black/[0.06] dark:border-white/[0.06] p-6 md:p-8">
+                  <div className="lg:sticky lg:top-28 rounded-[28px] bg-white border border-black/[0.06] p-6 md:p-8">
                     <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-3">Your plan</p>
                     <h3 className="font-display text-2xl mb-1">{tier.name}</h3>
                     <p className="text-sm opacity-60 italic mb-6">{tier.tagline}</p>
@@ -251,7 +251,7 @@ export default function Subscribe() {
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="opacity-60">Delivery</span>
-                        <span className="text-brand-green-deep dark:text-brand-green font-medium">Free</span>
+                        <span className="text-brand-green-deep font-medium">Free</span>
                       </div>
                       <div className="flex items-baseline justify-between pt-3 border-t border-current/10">
                         <span className="font-medium">Your weekly total</span>
@@ -274,7 +274,7 @@ export default function Subscribe() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mt-24 md:mt-32 p-8 md:p-12 rounded-[28px] bg-brand-charcoal dark:bg-brand-ink text-brand-cream border border-white/10"
+          className="mt-24 md:mt-32 p-8 md:p-12 rounded-[28px] bg-brand-charcoal text-brand-cream border border-white/10"
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="max-w-lg">
@@ -313,8 +313,8 @@ function TierCard({ tier, selected, onSelect, index }) {
       onClick={onSelect}
       className={`group relative text-left p-7 md:p-8 rounded-[28px] transition-all duration-300 ease-out hover:-translate-y-1 ${
         selected
-          ? 'bg-brand-charcoal dark:bg-brand-cream text-brand-cream dark:text-brand-charcoal border-2 border-brand-green shadow-xl'
-          : 'bg-white dark:bg-brand-ink border border-black/[0.06] dark:border-white/[0.06] hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-black/40'
+          ? 'bg-brand-charcoal text-brand-cream border-2 border-brand-green shadow-xl'
+          : 'bg-white border border-black/[0.06] hover:shadow-xl hover:shadow-black/5'
       }`}
     >
       {tier.featured && !selected && (
@@ -373,7 +373,7 @@ function Field({ label, name, value, onChange, type = 'text', textarea, required
         required={required}
         rows={textarea ? 2 : undefined}
         placeholder={placeholder}
-        className="w-full px-5 py-3.5 rounded-2xl bg-white dark:bg-brand-ink border border-black/[0.08] dark:border-white/[0.08] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 transition-all font-sans"
+        className="w-full px-5 py-3.5 rounded-2xl bg-white border border-black/[0.08] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 transition-all font-sans"
       />
       {hint && (
         <p
@@ -381,7 +381,7 @@ function Field({ label, name, value, onChange, type = 'text', textarea, required
             hintTone === 'error'
               ? 'text-brand-melon'
               : hintTone === 'ok'
-              ? 'text-brand-green-deep dark:text-brand-green'
+              ? 'text-brand-green-deep'
               : 'opacity-50'
           }`}
         >

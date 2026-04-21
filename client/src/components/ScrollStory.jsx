@@ -27,7 +27,7 @@ function WordReveal({ children, progress, range, accent = false, mobile = false 
     <span className="inline-block overflow-hidden align-bottom mr-2 md:mr-5">
       <motion.span
         style={{ y: yFinal, opacity }}
-        className={`inline-block ${accent ? 'text-brand-green-deep dark:text-brand-green' : ''}`}
+        className={`inline-block ${accent ? 'text-brand-green-deep' : ''}`}
       >
         {children}
       </motion.span>
@@ -61,7 +61,7 @@ export default function ScrollStory() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-brand-cream dark:bg-brand-charcoal"
+      className="relative bg-brand-cream"
       style={{ height: sectionHeight }}
       aria-label="Fresh ingredients, cold-pressed"
     >
@@ -108,7 +108,7 @@ export default function ScrollStory() {
           </div>
         </motion.div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black/5 dark:bg-white/5 z-30">
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black/5 z-30">
           <motion.div style={{ width: progressWidth }} className="h-full bg-brand-green" />
         </div>
       </div>

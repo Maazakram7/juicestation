@@ -38,7 +38,7 @@ export default function OrderSuccess() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
-          className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-brand-green/15 dark:bg-brand-green/25 flex items-center justify-center mx-auto mb-8"
+          className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-brand-green/15 flex items-center justify-center mx-auto mb-8"
         >
           <motion.svg
             width="48"
@@ -92,7 +92,7 @@ export default function OrderSuccess() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.1 }}
-          className="inline-block px-6 py-4 rounded-2xl bg-white dark:bg-brand-ink border border-black/[0.06] dark:border-white/[0.06] mb-10"
+          className="inline-block px-6 py-4 rounded-2xl bg-white border border-black/[0.06] mb-10"
         >
           <p className="text-xs uppercase tracking-[0.2em] opacity-50 mb-1">
             {isSubscription ? 'Subscription ID' : 'Order ID'}

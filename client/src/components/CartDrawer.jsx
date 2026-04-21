@@ -25,10 +25,10 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-brand-cream dark:bg-brand-charcoal z-[70] flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-brand-cream z-[70] flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <header className="px-6 py-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+            <header className="px-6 py-6 border-b border-black/5 flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] opacity-50">Your order</p>
                 <h2 className="font-display text-2xl mt-0.5">
@@ -59,7 +59,7 @@ export default function CartDrawer() {
                   </Link>
                 </div>
               ) : (
-                <ul className="divide-y divide-black/5 dark:divide-white/5">
+                <ul className="divide-y divide-black/5">
                   <AnimatePresence>
                     {items.map((item) => (
                       <motion.li
@@ -110,7 +110,7 @@ export default function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <footer className="px-6 py-6 border-t border-black/5 dark:border-white/5 bg-white/50 dark:bg-brand-ink/50">
+              <footer className="px-6 py-6 border-t border-black/5 bg-white/50">
                 <div className="flex items-baseline justify-between mb-4">
                   <span className="text-sm opacity-60">Subtotal</span>
                   <span className="font-display text-2xl tabular-nums">£{total.toFixed(2)}</span>

@@ -19,9 +19,9 @@ export default function Home() {
           muted
           loop
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-40 dark:opacity-30"
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-cream/70 via-brand-cream/40 to-brand-cream dark:from-brand-charcoal/70 dark:via-brand-charcoal/60 dark:to-brand-charcoal" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-cream/70 via-brand-cream/40 to-brand-cream" />
 
         <motion.div
           animate={{ y: [0, -20, 0], rotate: [0, 4, 0] }}
@@ -101,7 +101,7 @@ export default function Home() {
 
       <ScrollStory />
 
-      <section className="section bg-brand-cream dark:bg-brand-charcoal">
+      <section className="section bg-brand-cream">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-12 md:mb-20 flex-wrap gap-6">
             <motion.div

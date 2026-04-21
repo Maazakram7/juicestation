@@ -3,12 +3,16 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 
 export default function JuiceCard({ juice, index = 0 }) {
-  const { add } = useCart();
+  const { add, updateQty, items } = useCart();
   const [size, setSize] = useState('M');
-  const [justAdded, setJustAdded] = useState(false);
   const [fly, setFly] = useState(null);
   const sizes = juice.sizes || { M: juice.price };
   const price = sizes[size];
+
+  // Unique cart ID for this juice+size combination
+  const cartItemId = `${juice.id}-${size}`;
+  const cartItem = items.find((i) => i.id === cartItemId);
+  const qtyInCart = cartItem ? cartItem.qty : 0;
 
   const badges = [
     juice.isNew && { label: 'New', color: 'bg-brand-melon text-white' },
@@ -34,12 +38,15 @@ export default function JuiceCard({ juice, index = 0 }) {
     }
 
     add({
-      id: `${juice.id}-${size}`,
+      id: cartItemId,
       name: `${juice.name} (${size})`,
       price,
     });
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1200);
+  };
+
+  const handleDecrement = (e) => {
+    e.stopPropagation();
+    updateQty(cartItemId, qtyInCart - 1);
   };
 
   return (
@@ -49,7 +56,7 @@ export default function JuiceCard({ juice, index = 0 }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.45, delay: index * 0.03, ease: [0.2, 0.8, 0.2, 1] }}
-        className="group relative rounded-[18px] md:rounded-[28px] overflow-hidden bg-white dark:bg-brand-ink border border-black/[0.06] dark:border-white/[0.06] transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:shadow-xl md:hover:shadow-black/5 dark:md:hover:shadow-black/40"
+        className="group relative rounded-[18px] md:rounded-[28px] overflow-hidden bg-white border border-black/[0.06] transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:shadow-xl md:hover:shadow-black/5"
       >
         <div
           className={`h-1 md:h-2 w-full bg-gradient-to-r ${juice.gradient}`}
@@ -91,7 +98,7 @@ export default function JuiceCard({ juice, index = 0 }) {
                   onClick={() => setSize(s)}
                   className={`text-[10px] sm:text-[11px] md:text-xs tracking-wider px-2 sm:px-2.5 md:px-3 py-1 md:py-1.5 rounded-full transition-all tabular-nums ${
                     size === s
-                      ? 'bg-brand-charcoal dark:bg-brand-cream text-brand-cream dark:text-brand-charcoal'
+                      ? 'bg-brand-charcoal text-brand-cream'
                       : 'opacity-60 hover:opacity-100'
                   }`}
                 >
@@ -105,38 +112,70 @@ export default function JuiceCard({ juice, index = 0 }) {
               £{price.toFixed(2)}
             </span>
 
-            <motion.button
-              onClick={handleAdd}
-              whileTap={{ scale: 0.88 }}
-              whileHover={{ scale: 1.08 }}
-              animate={
-                justAdded
-                  ? { scale: [1, 1.2, 1], rotate: [0, 90, 0] }
-                  : { scale: 1, rotate: 0 }
-              }
-              transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
-              aria-label={`Add ${juice.name} to cart`}
-              className="relative w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-brand-charcoal dark:bg-brand-cream text-brand-cream dark:text-brand-charcoal flex items-center justify-center transition-colors"
-            >
-              <motion.span
-                key={justAdded ? 'tick' : 'plus'}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
-                {justAdded ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
+            {/* Quantity controls: single + when empty, − qty + pill when in cart */}
+            <AnimatePresence mode="wait" initial={false}>
+              {qtyInCart === 0 ? (
+                <motion.button
+                  key="add-btn"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={handleAdd}
+                  whileTap={{ scale: 0.88 }}
+                  whileHover={{ scale: 1.08 }}
+                  aria-label={`Add ${juice.name} to cart`}
+                  className="relative w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-brand-charcoal text-brand-cream flex items-center justify-center transition-colors"
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
-                )}
-              </motion.span>
-            </motion.button>
+                </motion.button>
+              ) : (
+                <motion.div
+                  key="qty-controls"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-1 bg-brand-charcoal text-brand-cream rounded-full p-1"
+                >
+                  <motion.button
+                    onClick={handleDecrement}
+                    whileTap={{ scale: 0.85 }}
+                    aria-label={`Remove one ${juice.name}`}
+                    className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </motion.button>
+
+                  <motion.span
+                    key={qtyInCart}
+                    initial={{ scale: 1.3, y: -2 }}
+                    animate={{ scale: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+                    className="font-display text-sm sm:text-base md:text-lg tabular-nums min-w-[14px] text-center"
+                  >
+                    {qtyInCart}
+                  </motion.span>
+
+                  <motion.button
+                    onClick={handleAdd}
+                    whileTap={{ scale: 0.85 }}
+                    aria-label={`Add another ${juice.name}`}
+                    className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </motion.article>
