@@ -65,7 +65,6 @@ export default function Navbar() {
               {({ isActive }) => (
                 <>
                   {l.label}
-                  {/* subtle underline indicator — grows on hover, stays on active */}
                   <span
                     className={`absolute left-4 right-4 -bottom-0.5 h-[1.5px] bg-current rounded-full origin-center transition-transform duration-300 ease-out ${
                       isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
@@ -82,6 +81,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button
+            id="cart-icon-target"
             onClick={toggle}
             aria-label="Open cart"
             className="relative w-10 h-10 rounded-full border border-current/15 hover:border-current/40 transition-colors flex items-center justify-center"

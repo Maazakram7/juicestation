@@ -1,13 +1,13 @@
 import { createContext, useContext, useEffect, useReducer } from 'react';
 
 const CartContext = createContext();
-
 const STORAGE_KEY = 'juicestation-cart';
 
-// Cart state shape: { items: [{ id, name, price, qty, meta? }], isOpen: bool }
+// Cart state: { items, isOpen, lastAdded (timestamp for triggering animations) }
 const initialState = {
   items: [],
   isOpen: false,
+  lastAdded: 0,
 };
 
 function reducer(state, action) {
@@ -16,19 +16,20 @@ function reducer(state, action) {
       return { ...state, items: action.payload || [] };
     case 'ADD': {
       const existing = state.items.find((i) => i.id === action.payload.id);
+      const now = Date.now();
       if (existing) {
         return {
           ...state,
           items: state.items.map((i) =>
             i.id === action.payload.id ? { ...i, qty: i.qty + 1 } : i
           ),
-          isOpen: true,
+          lastAdded: now,
         };
       }
       return {
         ...state,
         items: [...state.items, { ...action.payload, qty: 1 }],
-        isOpen: true,
+        lastAdded: now,
       };
     }
     case 'REMOVE':
@@ -54,7 +55,6 @@ function reducer(state, action) {
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -62,7 +62,6 @@ export function CartProvider({ children }) {
     } catch {}
   }, []);
 
-  // Persist on change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
   }, [state.items]);
@@ -75,6 +74,7 @@ export function CartProvider({ children }) {
       value={{
         items: state.items,
         isOpen: state.isOpen,
+        lastAdded: state.lastAdded,
         total,
         count,
         add: (item) => dispatch({ type: 'ADD', payload: item }),
