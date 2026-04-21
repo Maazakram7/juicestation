@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <>
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
+      <section className="relative min-h-[85vh] md:min-h-screen flex items-start md:items-center overflow-hidden pt-28 md:pt-20 pb-6 md:pb-0">
         {/* Ambient background video, low opacity */}
         <video
           src="/hero.mp4"
@@ -91,7 +91,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1.3 }}
-            className="mt-20 md:mt-32 flex flex-wrap gap-6 md:gap-12 text-sm opacity-70"
+            className="mt-10 md:mt-32 flex flex-wrap gap-4 md:gap-12 text-sm opacity-70"
           >
             {[
               ['No water', 'Ever.'],
@@ -135,7 +135,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
             {featured.map((juice, i) => (
               <JuiceCard key={juice.id} juice={juice} index={i} />
             ))}

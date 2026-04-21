@@ -66,7 +66,7 @@ export default function Menu() {
                   <h2 className="font-display text-2xl md:text-4xl tracking-tight">{cat.label}</h2>
                   <p className="text-xs md:text-sm opacity-50 tracking-wide">{cat.subtitle}</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
                   {cat.items.map((juice, i) => (
                     <JuiceCard key={juice.id} juice={juice} index={i} />
                   ))}
