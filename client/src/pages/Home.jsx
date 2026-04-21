@@ -26,12 +26,12 @@ export default function Home() {
         <motion.div
           animate={{ y: [0, -20, 0], rotate: [0, 4, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-[20%] right-[8%] w-24 h-24 md:w-40 md:h-40 rounded-full bg-brand-melon/20 blur-2xl"
+          className="hidden md:block absolute top-[20%] right-[8%] w-24 h-24 md:w-40 md:h-40 rounded-full bg-brand-melon/20 blur-2xl"
         />
         <motion.div
           animate={{ y: [0, 30, 0], rotate: [0, -4, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-          className="absolute bottom-[20%] left-[5%] w-32 h-32 md:w-52 md:h-52 rounded-full bg-brand-green/20 blur-3xl"
+          className="hidden md:block absolute bottom-[20%] left-[5%] w-32 h-32 md:w-52 md:h-52 rounded-full bg-brand-green/20 blur-3xl"
         />
 
         <div className="relative max-w-7xl mx-auto px-6 md:px-10 w-full">
