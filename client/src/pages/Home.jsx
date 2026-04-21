@@ -48,9 +48,9 @@ export default function Home() {
             Bracknell · Berkshire · Since day one
           </motion.p>
 
-          <h1 className="font-display text-[11vw] md:text-[8vw] lg:text-[6.8vw] leading-[0.9] tracking-tighter max-w-[16ch]">
-            {HEADLINE.map((word, i) => (
-              <span key={i} className="inline-block overflow-hidden align-bottom mr-3 md:mr-5">
+          <h1 className="font-display text-[14vw] md:text-[9vw] lg:text-[7.5vw] leading-[0.9] tracking-tighter max-w-[18ch]">
+  {HEADLINE.map((word, i) => (
+    <span key={i} className="block overflow-hidden align-bottom">
                 <motion.span
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}

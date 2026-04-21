@@ -67,7 +67,7 @@ function MarqueeRow({ items, reverse = false, duration = 80 }) {
   return (
     <div className="overflow-hidden" role="region">
       <div
-        className={`flex w-max ${animClass} hover:[animation-play-state:paused]`}
+        className={`flex w-max ${animClass}`}
         style={{ animationDuration: `${duration}s` }}
       >
         {doubled.map((r, i) => (
