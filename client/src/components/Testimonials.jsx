@@ -99,7 +99,8 @@ export default function Testimonials() {
             </h2>
           </div>
           <a
-            href="https://www.google.com/maps/place/?q=place_id:ChIJIWr1WAB1dkgRzlYc2_8nI6w"
+            href="https://search.google.com/local/reviews?placeid=ChIJIWr1WAB1dkgRzlYc2_8nI6w"
+
             target="_blank"
             rel="noopener noreferrer"
             className="btn-ghost shrink-0"
