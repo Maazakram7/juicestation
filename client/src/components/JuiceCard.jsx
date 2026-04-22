@@ -8,8 +8,8 @@ export default function JuiceCard({ juice, index = 0 }) {
   const [fly, setFly] = useState(null);
   const sizes = juice.sizes || { M: juice.price };
   const price = sizes[size];
+  const hasMultipleSizes = Object.keys(sizes).length > 1;
 
-  // Unique cart ID for this juice+size combination
   const cartItemId = `${juice.id}-${size}`;
   const cartItem = items.find((i) => i.id === cartItemId);
   const qtyInCart = cartItem ? cartItem.qty : 0;
@@ -56,25 +56,37 @@ export default function JuiceCard({ juice, index = 0 }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.45, delay: index * 0.03, ease: [0.2, 0.8, 0.2, 1] }}
-        className="group relative rounded-[18px] md:rounded-[28px] overflow-hidden bg-white border border-black/[0.06] transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:shadow-xl md:hover:shadow-black/5"
+        className="group relative rounded-[18px] md:rounded-[28px] overflow-hidden bg-white border border-black/[0.06] transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:shadow-xl md:hover:shadow-black/5 flex flex-col"
       >
         <div
-          className={`h-1 md:h-2 w-full bg-gradient-to-r ${juice.gradient}`}
+          className={`h-1 md:h-2 w-full bg-gradient-to-r ${juice.gradient} flex-shrink-0`}
           aria-hidden="true"
         />
-        <div className="p-4 sm:p-5 md:p-8">
-          {badges.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2 md:mb-4">
-              {badges.map((b) => (
+        <div className="p-4 sm:p-5 md:p-8 flex flex-col flex-1">
+          {/* Badge row — always rendered, invisible when no badges, to keep card heights aligned */}
+          <div
+            className={`flex flex-wrap gap-1 mb-2 md:mb-4 min-h-[20px] md:min-h-[24px] ${
+              badges.length === 0 ? 'invisible' : ''
+            }`}
+            aria-hidden={badges.length === 0}
+          >
+            {badges.length > 0 ? (
+              badges.map((b) => (
                 <span
                   key={b.label}
                   className={`text-[8px] sm:text-[9px] md:text-[10px] uppercase tracking-wider font-medium px-1.5 sm:px-2 md:px-2.5 py-0.5 md:py-1 rounded-full ${b.color}`}
                 >
                   {b.label}
                 </span>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              // Invisible spacer to reserve badge height
+              <span className="text-[8px] sm:text-[9px] md:text-[10px] px-1.5 sm:px-2 md:px-2.5 py-0.5 md:py-1">
+                &nbsp;
+              </span>
+            )}
+          </div>
+
           <h3 className="font-display text-base sm:text-xl md:text-3xl tracking-tight leading-[0.95] mb-1 md:mb-2 relative inline-block">
             {juice.name}
             <span
@@ -83,16 +95,29 @@ export default function JuiceCard({ juice, index = 0 }) {
               aria-hidden="true"
             />
           </h3>
-          <p className="text-[11px] sm:text-[13px] md:text-sm opacity-60 mb-3 md:mb-6">{juice.tagline}</p>
+
+          {/* Tagline — reserve height so cards without tagline stay aligned */}
+          <p className="text-[11px] sm:text-[13px] md:text-sm opacity-60 mb-3 md:mb-6 min-h-[16px] md:min-h-[20px]">
+            {juice.tagline || '\u00A0'}
+          </p>
+
+          {/* Ingredients — min-height for consistent wrapping */}
           <p
-            className="text-[10px] sm:text-[12px] md:text-[13px] leading-relaxed opacity-75 mb-3 md:mb-6 border-l-2 pl-2 sm:pl-3 md:pl-4 py-0.5 md:py-1"
+            className="text-[10px] sm:text-[12px] md:text-[13px] leading-relaxed opacity-75 mb-3 md:mb-6 border-l-2 pl-2 sm:pl-3 md:pl-4 py-0.5 md:py-1 min-h-[36px] sm:min-h-[42px] md:min-h-[48px]"
             style={{ borderColor: juice.accent }}
           >
             {juice.ingredients.join(' · ')}
           </p>
-          {Object.keys(sizes).length > 1 && (
-            <div className="flex items-center gap-1 mb-3 md:mb-5 p-0.5 md:p-1 rounded-full border border-current/10 w-fit">
-              {Object.entries(sizes).map(([s, p]) => (
+
+          {/* Size selector — always rendered, invisible when only one size */}
+          <div
+            className={`flex items-center gap-1 mb-3 md:mb-5 p-0.5 md:p-1 rounded-full border border-current/10 w-fit ${
+              hasMultipleSizes ? '' : 'invisible'
+            }`}
+            aria-hidden={!hasMultipleSizes}
+          >
+            {hasMultipleSizes ? (
+              Object.entries(sizes).map(([s, p]) => (
                 <button
                   key={s}
                   onClick={() => setSize(s)}
@@ -104,15 +129,21 @@ export default function JuiceCard({ juice, index = 0 }) {
                 >
                   {s} · £{p}
                 </button>
-              ))}
-            </div>
-          )}
-          <div className="flex items-center justify-between gap-2 md:gap-3 pt-2 md:pt-4 border-t border-current/10">
+              ))
+            ) : (
+              // Invisible spacer matching the size selector's height
+              <span className="text-[10px] sm:text-[11px] md:text-xs px-2 sm:px-2.5 md:px-3 py-1 md:py-1.5">
+                &nbsp;
+              </span>
+            )}
+          </div>
+
+          {/* Price + quantity controls — pushed to bottom with mt-auto */}
+          <div className="flex items-center justify-between gap-2 md:gap-3 pt-2 md:pt-4 border-t border-current/10 mt-auto">
             <span className="font-display text-base sm:text-xl md:text-2xl tabular-nums">
               £{price.toFixed(2)}
             </span>
 
-            {/* Quantity controls: single + when empty, − qty + pill when in cart */}
             <AnimatePresence mode="wait" initial={false}>
               {qtyInCart === 0 ? (
                 <motion.button
