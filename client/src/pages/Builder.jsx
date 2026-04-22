@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { INGREDIENTS, BASE_CUSTOM_PRICE, MAX_CUSTOM_INGREDIENTS, CUSTOM_SIZE_UPCHARGE } from '../data/menu';
 import { useCart } from '../context/CartContext';
 
@@ -92,6 +92,11 @@ export default function Builder() {
   const [added, setAdded] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [fly, setFly] = useState(null);
+
+  // Refs so we can find the button positions when firing the flying animation
+  const desktopAddBtnRef = useRef(null);
+  const mobileAddBtnRef = useRef(null);
 
   const toggle = (id) => {
     const ing = INGREDIENTS.find((i) => i.id === id);
@@ -131,11 +136,34 @@ export default function Builder() {
     return sum + BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size];
   }, [selected, size]);
 
-  const handleAdd = () => {
+  const triggerFlyingDot = (sourceEl) => {
+    if (!sourceEl) return;
+
+    const cartIcon = document.getElementById('cart-icon-target');
+    if (!cartIcon) return;
+
+    const rect = sourceEl.getBoundingClientRect();
+    const cartRect = cartIcon.getBoundingClientRect();
+
+    setFly({
+      id: Date.now(),
+      startX: rect.left + rect.width / 2,
+      startY: rect.top + rect.height / 2,
+      endX: cartRect.left + cartRect.width / 2,
+      endY: cartRect.top + cartRect.height / 2,
+    });
+    setTimeout(() => setFly(null), 750);
+  };
+
+  const handleAdd = (sourceEl) => {
     if (selected.length === 0) return;
     const names = selected
       .map((id) => INGREDIENTS.find((i) => i.id === id)?.name)
       .filter(Boolean);
+
+    // Fire flying dot BEFORE state clears (so positions are still valid)
+    triggerFlyingDot(sourceEl);
+
     add({
       id: `custom-${Date.now()}`,
       name: `Custom juice (${size})`,
@@ -145,6 +173,9 @@ export default function Builder() {
     setSelected([]);
     setAdded(true);
     setMobileDrawerOpen(false);
+
+    // Auto-reset the "Added" state after 1.5s so user can build another
+    setTimeout(() => setAdded(false), 1500);
   };
 
   return (
@@ -254,7 +285,6 @@ export default function Builder() {
                 </AnimatePresence>
               </div>
 
-              {/* Size selector */}
               {selected.length > 0 && (
                 <div className="mb-5">
                   <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-2">Size</p>
@@ -269,14 +299,35 @@ export default function Builder() {
                 </span>
               </div>
 
-              <button
-                onClick={handleAdd}
+              <motion.button
+                ref={desktopAddBtnRef}
+                onClick={() => handleAdd(desktopAddBtnRef.current)}
                 disabled={selected.length === 0}
-                className="btn-primary w-full disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                whileTap={{ scale: 0.97 }}
+                animate={{
+                  backgroundColor: added
+                    ? '#111111'
+                    : selected.length === 0
+                    ? '#7DC24250'
+                    : '#7DC242',
+                }}
+                transition={{ duration: 0.25 }}
+                className="w-full inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-white font-medium text-sm tracking-wide transition-all duration-300 ease-out disabled:cursor-not-allowed"
               >
-                {added ? 'Added ✓' : 'Add to cart'}
-                {!added && <span>→</span>}
-              </button>
+                {added ? (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Added to cart
+                  </>
+                ) : (
+                  <>
+                    Add to cart
+                    <span>→</span>
+                  </>
+                )}
+              </motion.button>
 
               <AnimatePresence>
                 {added && (
@@ -328,6 +379,38 @@ export default function Builder() {
           </div>
         ))}
       </div>
+
+      {/* Flying dot animation — colored green since custom juice has no single accent */}
+      <AnimatePresence>
+        {fly && (
+          <motion.div
+            key={fly.id}
+            initial={{
+              left: fly.startX - 10,
+              top: fly.startY - 10,
+              opacity: 1,
+              scale: 1,
+            }}
+            animate={{
+              left: fly.endX - 10,
+              top: fly.endY - 10,
+              scale: 0.3,
+              opacity: 0,
+            }}
+            transition={{ duration: 0.7, ease: [0.5, 0, 0.75, 0] }}
+            style={{
+              position: 'fixed',
+              width: 20,
+              height: 20,
+              borderRadius: 999,
+              backgroundColor: '#7DC242',
+              zIndex: 9999,
+              pointerEvents: 'none',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Mobile sticky bottom bar */}
       <AnimatePresence>
@@ -389,7 +472,6 @@ export default function Builder() {
                     </li>
                   </ul>
 
-                  {/* Size selector in drawer */}
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-2">Size</p>
                     <SizeSelector size={size} onChange={setSize} total={total} />
@@ -422,13 +504,28 @@ export default function Builder() {
                 )}
               </button>
 
-              <button
-                onClick={handleAdd}
+              <motion.button
+                ref={mobileAddBtnRef}
+                onClick={() => handleAdd(mobileAddBtnRef.current)}
                 disabled={selected.length === 0}
-                className="px-5 py-3 rounded-full bg-brand-green text-white font-medium text-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                whileTap={{ scale: 0.95 }}
+                animate={{
+                  backgroundColor: added ? '#111111' : '#7DC242',
+                }}
+                transition={{ duration: 0.25 }}
+                className="px-5 py-3 rounded-full text-white font-medium text-sm transition-all disabled:cursor-not-allowed"
               >
-                {added ? 'Done' : 'Add →'}
-              </button>
+                {added ? (
+                  <span className="flex items-center gap-1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Done
+                  </span>
+                ) : (
+                  'Add →'
+                )}
+              </motion.button>
             </div>
           </motion.div>
         )}
