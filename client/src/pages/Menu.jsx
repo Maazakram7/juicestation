@@ -1,13 +1,31 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import JuiceCard from '../components/JuiceCard';
 import { CATEGORIES } from '../data/menu';
 
 export default function Menu() {
-  // "all" shows every category stacked, or pick one
   const [active, setActive] = useState('all');
+  const resultsRef = useRef(null);
 
   const visibleCategories = active === 'all' ? CATEGORIES : CATEGORIES.filter((c) => c.id === active);
+
+  const handleCategoryChange = (id) => {
+    if (id === active) return; // skip if same category
+
+    setActive(id);
+
+    // Wait for React to re-render with new content, then scroll
+    // Using rAF + setTimeout ensures the scroll happens after layout
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        if (resultsRef.current) {
+          const y = resultsRef.current.getBoundingClientRect().top + window.scrollY - 100;
+          // -100 offset accounts for fixed navbar height so results aren't hidden behind it
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 50);
+    });
+  };
 
   return (
     <div className="pt-32 md:pt-40 pb-24">
@@ -39,42 +57,48 @@ export default function Menu() {
           transition={{ duration: 0.5, delay: 0.25 }}
           className="flex flex-wrap gap-2 mb-12 md:mb-16"
         >
-          <CategoryPill label="Everything" active={active === 'all'} onClick={() => setActive('all')} />
+          <CategoryPill
+            label="Everything"
+            active={active === 'all'}
+            onClick={() => handleCategoryChange('all')}
+          />
           {CATEGORIES.map((c) => (
             <CategoryPill
               key={c.id}
               label={c.label}
               active={active === c.id}
-              onClick={() => setActive(c.id)}
+              onClick={() => handleCategoryChange(c.id)}
             />
           ))}
         </motion.div>
 
-        {/* Categories */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.35 }}
-            className="space-y-20 md:space-y-28"
-          >
-            {visibleCategories.map((cat) => (
-              <section key={cat.id} id={cat.id}>
-                <div className="flex items-end justify-between flex-wrap gap-4 mb-8 md:mb-10 pb-6 border-b border-current/10">
-                  <h2 className="font-display text-2xl md:text-4xl tracking-tight">{cat.label}</h2>
-                  <p className="text-xs md:text-sm opacity-50 tracking-wide">{cat.subtitle}</p>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
-                  {cat.items.map((juice, i) => (
-                    <JuiceCard key={juice.id} juice={juice} index={i} />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+        {/* Categories — scroll target */}
+        <div ref={resultsRef}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35 }}
+              className="space-y-20 md:space-y-28"
+            >
+              {visibleCategories.map((cat) => (
+                <section key={cat.id} id={cat.id}>
+                  <div className="flex items-end justify-between flex-wrap gap-4 mb-8 md:mb-10 pb-6 border-b border-current/10">
+                    <h2 className="font-display text-2xl md:text-4xl tracking-tight">{cat.label}</h2>
+                    <p className="text-xs md:text-sm opacity-50 tracking-wide">{cat.subtitle}</p>
+                  </div>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
+                    {cat.items.map((juice, i) => (
+                      <JuiceCard key={juice.id} juice={juice} index={i} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
         {/* Allergen note */}
         <motion.div
