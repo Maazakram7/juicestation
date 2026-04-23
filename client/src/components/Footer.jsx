@@ -44,7 +44,31 @@ export default function Footer() {
           <div className="md:col-span-2">
             <h4 className="text-xs uppercase tracking-[0.2em] opacity-50 mb-4">Follow</h4>
             <ul className="space-y-2.5 text-sm">
-              <li><a href="#" className="hover:text-brand-green-deep transition-colors">Instagram</a></li>
+              <li>
+  <a
+    href="https://www.instagram.com/juiceestationuk/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity"
+    aria-label="Follow JUICEeSTATION on Instagram"
+  >
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+    <span className="text-sm">@juiceestationuk</span>
+  </a>
+</li>
               <li><a href="#" className="hover:text-brand-green-deep transition-colors">TikTok</a></li>
               <li><a href="#" className="hover:text-brand-green-deep transition-colors">Google</a></li>
             </ul>
