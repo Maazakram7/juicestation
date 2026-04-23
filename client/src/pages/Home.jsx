@@ -114,13 +114,13 @@ export default function Home() {
             >
               <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">The roster</p>
               <h2 className="font-display text-3xl md:text-5xl lg:text-6xl leading-[0.95]">
-                Nine juices.
+                Twenty signature juices.
                 <br />
                 <em className="not-italic text-brand-citrus">Zero shortcuts.</em>
               </h2>
             </motion.div>
             <Link to="/menu" className="btn-ghost">
-              See all nine
+              See all twenty signature juices
               <span>→</span>
             </Link>
           </div>
