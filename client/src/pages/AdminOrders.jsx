@@ -16,10 +16,7 @@ export default function AdminOrders() {
   const handleLogout = () => {
     console.log('Signing out...');
     sessionStorage.removeItem(STORAGE_KEY);
-    setToken('');
-    setAuthed(false);
-    // Force a clean state by reloading
-    window.location.reload();
+    window.location.href = '/admin/orders';
   };
 
   if (!authed) {
@@ -115,7 +112,6 @@ function Dashboard({ token, onLogout }) {
   }, [fetchOrders]);
 
   const fulfillOrder = async (orderId) => {
-    if (!confirm(`Mark ${orderId} as fulfilled?`)) return;
     try {
       const res = await fetch(`${API_URL}/admin/orders/${orderId}/fulfill`, {
         method: 'PATCH',
@@ -129,12 +125,6 @@ function Dashboard({ token, onLogout }) {
     } catch (err) {
       alert('Error: ' + err.message);
     }
-  };
-
-  const handleSignOut = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onLogout();
   };
 
   const filtered = orders.filter((o) => {
@@ -159,8 +149,14 @@ function Dashboard({ token, onLogout }) {
           </div>
           <button
             type="button"
-            onClick={handleSignOut}
-            className="text-xs uppercase tracking-wider opacity-60 hover:opacity-100 px-4 py-2 rounded-full border border-black/10 hover:border-black/30 transition-all"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Sign out clicked');
+              onLogout();
+            }}
+            style={{ position: 'relative', zIndex: 100 }}
+            className="text-sm uppercase tracking-wider px-5 py-3 rounded-full border-2 border-brand-charcoal hover:bg-brand-charcoal hover:text-brand-cream transition-all font-medium cursor-pointer"
           >
             Sign out
           </button>
@@ -244,20 +240,6 @@ function OrderCard({ order, onFulfill }) {
     return d.toLocaleDateString();
   };
 
-  const handleFulfillClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onFulfill(order.order_id);
-  };
-
-  const handleHeaderClick = () => {
-    setExpanded(!expanded);
-  };
-
-  const handleLinkClick = (e) => {
-    e.stopPropagation();
-  };
-
   return (
     <motion.div
       layout
@@ -267,10 +249,10 @@ function OrderCard({ order, onFulfill }) {
       className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden"
     >
       <div
-        onClick={handleHeaderClick}
+        onClick={() => setExpanded(!expanded)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleHeaderClick(); }}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(!expanded); }}
         className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors cursor-pointer"
       >
         <div className="flex items-start justify-between gap-4">
@@ -304,13 +286,13 @@ function OrderCard({ order, onFulfill }) {
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Contact</p>
                 <p className="text-sm">
-                  <a href={`mailto:${order.customer_email}`} onClick={handleLinkClick} className="text-brand-green-deep">
+                  <a href={`mailto:${order.customer_email}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
                     {order.customer_email}
                   </a>
                 </p>
                 {order.customer_phone && (
                   <p className="text-sm">
-                    <a href={`tel:${order.customer_phone}`} onClick={handleLinkClick} className="text-brand-green-deep">
+                    <a href={`tel:${order.customer_phone}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
                       {order.customer_phone}
                     </a>
                   </p>
@@ -347,7 +329,11 @@ function OrderCard({ order, onFulfill }) {
               {order.status === 'paid' && (
                 <button
                   type="button"
-                  onClick={handleFulfillClick}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onFulfill(order.order_id);
+                  }}
                   className="btn-primary w-full text-sm"
                 >
                   Mark as fulfilled
