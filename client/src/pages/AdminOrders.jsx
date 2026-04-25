@@ -14,15 +14,18 @@ export default function AdminOrders() {
   };
 
   const handleLogout = () => {
+    console.log('Signing out...');
     sessionStorage.removeItem(STORAGE_KEY);
     setToken('');
     setAuthed(false);
+    // Force a clean state by reloading
+    window.location.reload();
   };
 
   if (!authed) {
     return <LoginScreen onAuth={handleAuth} />;
   }
-  return <Dashboard token={token} onLogout={handleLogout} />;
+  return <Dashboard key={token} token={token} onLogout={handleLogout} />;
 }
 
 function LoginScreen({ onAuth }) {
