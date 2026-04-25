@@ -6,16 +6,23 @@ const STORAGE_KEY = 'js_admin_token';
 
 export default function AdminOrders() {
   const [token, setToken] = useState(() => sessionStorage.getItem(STORAGE_KEY) || '');
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(() => !!sessionStorage.getItem(STORAGE_KEY));
 
-  if (!authed) {
-    return <LoginScreen onAuth={(t) => { setToken(t); setAuthed(true); }} />;
-  }
-  return <Dashboard token={token} onLogout={() => {
+  const handleAuth = (t) => {
+    setToken(t);
+    setAuthed(true);
+  };
+
+  const handleLogout = () => {
     sessionStorage.removeItem(STORAGE_KEY);
     setToken('');
     setAuthed(false);
-  }} />;
+  };
+
+  if (!authed) {
+    return <LoginScreen onAuth={handleAuth} />;
+  }
+  return <Dashboard token={token} onLogout={handleLogout} />;
 }
 
 function LoginScreen({ onAuth }) {
@@ -111,11 +118,20 @@ function Dashboard({ token, onLogout }) {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Could not update');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Could not update order');
+      }
       await fetchOrders();
     } catch (err) {
-      alert(err.message);
+      alert('Error: ' + err.message);
     }
+  };
+
+  const handleSignOut = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onLogout();
   };
 
   const filtered = orders.filter((o) => {
@@ -138,7 +154,11 @@ function Dashboard({ token, onLogout }) {
             <p className="text-xs uppercase tracking-[0.3em] opacity-50">Admin</p>
             <h1 className="font-display text-3xl md:text-4xl">Orders</h1>
           </div>
-          <button onClick={onLogout} className="text-xs uppercase tracking-wider opacity-60 hover:opacity-100">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="text-xs uppercase tracking-wider opacity-60 hover:opacity-100 px-4 py-2 rounded-full border border-black/10 hover:border-black/30 transition-all"
+          >
             Sign out
           </button>
         </div>
@@ -152,6 +172,7 @@ function Dashboard({ token, onLogout }) {
           ].map((f) => (
             <button
               key={f.id}
+              type="button"
               onClick={() => setFilter(f.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
                 filter === f.id
@@ -220,6 +241,20 @@ function OrderCard({ order, onFulfill }) {
     return d.toLocaleDateString();
   };
 
+  const handleFulfillClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onFulfill(order.order_id);
+  };
+
+  const handleHeaderClick = () => {
+    setExpanded(!expanded);
+  };
+
+  const handleLinkClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <motion.div
       layout
@@ -228,9 +263,12 @@ function OrderCard({ order, onFulfill }) {
       exit={{ opacity: 0, y: -10 }}
       className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden"
     >
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors"
+      <div
+        onClick={handleHeaderClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleHeaderClick(); }}
+        className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors cursor-pointer"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -248,7 +286,7 @@ function OrderCard({ order, onFulfill }) {
             <p className="font-display text-xl md:text-2xl tabular-nums">£{Number(order.total).toFixed(2)}</p>
           </div>
         </div>
-      </button>
+      </div>
 
       <AnimatePresence>
         {expanded && (
@@ -262,10 +300,16 @@ function OrderCard({ order, onFulfill }) {
             <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-black/[0.06] pt-4 space-y-4">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Contact</p>
-                <p className="text-sm">{order.customer_email}</p>
+                <p className="text-sm">
+                  <a href={`mailto:${order.customer_email}`} onClick={handleLinkClick} className="text-brand-green-deep">
+                    {order.customer_email}
+                  </a>
+                </p>
                 {order.customer_phone && (
                   <p className="text-sm">
-                    <a href={`tel:${order.customer_phone}`} className="text-brand-green-deep">{order.customer_phone}</a>
+                    <a href={`tel:${order.customer_phone}`} onClick={handleLinkClick} className="text-brand-green-deep">
+                      {order.customer_phone}
+                    </a>
                   </p>
                 )}
               </div>
@@ -299,7 +343,8 @@ function OrderCard({ order, onFulfill }) {
 
               {order.status === 'paid' && (
                 <button
-                  onClick={() => onFulfill(order.order_id)}
+                  type="button"
+                  onClick={handleFulfillClick}
                   className="btn-primary w-full text-sm"
                 >
                   Mark as fulfilled
