@@ -6,7 +6,7 @@ const STORAGE_KEY = 'js_gate_unlocked';
 
 // Routes that bypass the password gate — mainly Stripe return URLs
 // so customers coming back from payment don't hit another password prompt
-const EXEMPT_ROUTES = ['/order-success'];
+const EXEMPT_ROUTES = ['/order-success', '/admin/orders'];
 
 export default function PasswordGate({ children }) {
   const [unlocked, setUnlocked] = useState(false);

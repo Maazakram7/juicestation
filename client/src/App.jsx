@@ -11,6 +11,7 @@ import Builder from './pages/Builder';
 import Subscribe from './pages/Subscribe';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
+import AdminOrders from './pages/AdminOrders';
 
 function PageTransition({ children }) {
   return (
@@ -43,7 +44,8 @@ export default function App() {
               <Route path="/subscribe" element={<PageTransition><Subscribe /></PageTransition>} />
               <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
               <Route path="/order-success" element={<PageTransition><OrderSuccess /></PageTransition>} />
-            </Routes>
+              <Route path="/admin/orders" element={<PageTransition><AdminOrders /></PageTransition>} />
+          </Routes>
           </AnimatePresence>
         </main>
         <Footer />
