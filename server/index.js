@@ -5,6 +5,7 @@ import menuRoutes from './routes/menu.js';
 import orderRoutes from './routes/orders.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import stripeRoutes from './routes/stripe.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 app.use('/menu', menuRoutes);
 app.use('/order', orderRoutes);
 app.use('/subscription', subscriptionRoutes);
+app.use('/admin', adminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found.' });

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import express from 'express';
 import { stripe, webhookSecret } from '../lib/stripe.js';
 import { supabase } from '../lib/supabase.js';
+import { sendCustomerConfirmation, sendOwnerNotification } from '../lib/mailer.js';
 
 const router = Router();
 
@@ -29,15 +30,32 @@ router.post(
           const orderId = session.metadata?.order_id;
 
           if (orderId) {
-            await supabase
+            const { data: updatedOrder, error } = await supabase
               .from('orders')
               .update({
                 status: 'paid',
                 payment_intent_id: session.payment_intent,
                 paid_at: new Date().toISOString(),
               })
-              .eq('order_id', orderId);
+              .eq('order_id', orderId)
+              .select()
+              .single();
+
+            if (error) {
+              console.error(`[stripe webhook] failed to update order ${orderId}:`, error);
+              break;
+            }
+
             console.log(`[stripe webhook] order ${orderId} marked as paid`);
+
+            if (updatedOrder) {
+              sendCustomerConfirmation(updatedOrder).catch((err) =>
+                console.error('[stripe webhook] customer email failed:', err)
+              );
+              sendOwnerNotification(updatedOrder).catch((err) =>
+                console.error('[stripe webhook] owner email failed:', err)
+              );
+            }
           }
           break;
         }
