@@ -46,5 +46,50 @@ router.patch('/orders/:id/fulfill', requireAdmin, async (req, res) => {
   }
   res.json({ order: data });
 });
+// GET /admin/subscriptions — list all subscription signups, newest first
+router.get('/subscriptions', requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
 
+  if (error) {
+    console.error('[admin/subscriptions] fetch error:', error);
+    return res.status(500).json({ error: 'Could not fetch subscriptions.' });
+  }
+  res.json({ subscriptions: data || [] });
+});
+
+// PATCH /admin/subscriptions/:id/activate — mark as active (after manual setup)
+router.patch('/subscriptions/:id/activate', requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .update({
+      status: 'active',
+      activated_at: new Date().toISOString(),
+    })
+    .eq('subscription_id', req.params.id)
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ subscription: data });
+});
+
+// PATCH /admin/subscriptions/:id/cancel — mark as cancelled
+router.patch('/subscriptions/:id/cancel', requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .update({
+      status: 'cancelled',
+      cancelled_at: new Date().toISOString(),
+    })
+    .eq('subscription_id', req.params.id)
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ subscription: data });
+});
 export default router;
