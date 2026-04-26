@@ -74,6 +74,16 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'Could not save subscription.' });
     }
 
+    // Fire emails — non-blocking
+    if (data) {
+      sendSubscriptionCustomerAck(data).catch((err) =>
+        console.error('[subscriptions] customer email failed:', err)
+      );
+      sendSubscriptionOwnerNotification(data).catch((err) =>
+        console.error('[subscriptions] owner email failed:', err)
+      );
+    }
+
     // NOTE (Stripe integration point):
     // 1) Create a Stripe Customer for customer.email
     // 2) Create a Product + Price in Stripe for each tier (one-time, or use Stripe Subscriptions with a weekly interval)
