@@ -20,12 +20,11 @@ function WordReveal({ children, progress, range, accent = false }) {
     [start, start + (end - start) * 0.4, end],
     [0, 0.5, 1]
   );
-  const ySpring = useSpring(y, { stiffness: 120, damping: 20 });
 
   return (
     <span className="inline-block overflow-hidden align-bottom mr-3 md:mr-5">
       <motion.span
-        style={{ y: ySpring, opacity }}
+        style={{ y, opacity, willChange: "transform, opacity" }}
         className={`inline-block ${accent ? 'text-brand-green-deep' : ''}`}
       >
         {children}
@@ -115,8 +114,6 @@ function MobileSequencer() {
           )}
         </AnimatePresence>
       </div>
-
-      
     </section>
   );
 }
@@ -130,20 +127,19 @@ function DesktopScrollStory() {
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 70,
-    damping: 28,
-    mass: 0.5,
+    stiffness: 90,
+    damping: 30,
+    mass: 0.4,
   });
 
   const marqueeX = useTransform(smoothProgress, [0, 1], ['0%', '-40%']);
   const progressWidth = useTransform(smoothProgress, [0, 1], ['0%', '100%']);
-  const bgRotate = useTransform(smoothProgress, [0, 1], [0, 200]);
 
   return (
     <section
       ref={sectionRef}
       className="relative bg-brand-cream"
-      style={{ height: '320vh' }}
+      style={{ height: '240vh' }}
       aria-label="Fresh ingredients, cold-pressed"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden">
@@ -152,16 +148,18 @@ function DesktopScrollStory() {
           <span className="font-mono">Fresh &middot; Raw &middot; Cold-pressed</span>
         </div>
 
-        <motion.div
-          style={{ rotate: bgRotate }}
+        <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           aria-hidden="true"
         >
           <div
-            className="w-[70%] h-[70%] rounded-full opacity-20 blur-3xl"
-            style={{ background: 'conic-gradient(from 0deg, #7DC242, #F39324, #E94E4E, #7DC242)' }}
+            className="w-[70%] h-[70%] rounded-full opacity-15"
+            style={{
+              background: "radial-gradient(circle, #7DC242 0%, #F39324 40%, #E94E4E 70%, transparent 100%)",
+              filter: "blur(60px)",
+            }}
           />
-        </motion.div>
+        </div>
 
         <div className="relative z-20 h-full flex items-center justify-center px-10">
           <h2 className="font-display text-center text-[7vw] lg:text-[6vw] leading-[0.95] tracking-tight max-w-[18ch]">
@@ -180,7 +178,7 @@ function DesktopScrollStory() {
         </div>
 
         <motion.div
-          style={{ x: marqueeX }}
+          style={{ x: marqueeX, willChange: "transform" }}
           className="absolute bottom-14 left-0 right-0 z-20 whitespace-nowrap pointer-events-none select-none"
         >
           <div className="flex gap-16 text-sm uppercase tracking-[0.3em] opacity-40">
@@ -194,7 +192,7 @@ function DesktopScrollStory() {
         </motion.div>
 
         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black/5 z-30">
-          <motion.div style={{ width: progressWidth }} className="h-full bg-brand-green" />
+          <motion.div style={{ width: progressWidth, willChange: "width" }} className="h-full bg-brand-green" />
         </div>
       </div>
     </section>
