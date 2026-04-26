@@ -82,6 +82,13 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* Mobile-only Menu shortcut */}
+          <Link
+            to="/menu"
+            className="md:hidden px-4 py-2 rounded-full bg-brand-green text-white text-sm font-medium tracking-wide hover:bg-brand-green-deep transition-colors"
+          >
+            Menu
+          </Link>
         
           <button
             id="cart-icon-target"
