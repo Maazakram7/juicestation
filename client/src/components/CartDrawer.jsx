@@ -1,9 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { ONE_OFF_MIN_ORDER } from '../data/subscriptions';
 
 export default function CartDrawer() {
   const { items, isOpen, close, total, updateQty, remove } = useCart();
+  const meetsMinimum = total >= ONE_OFF_MIN_ORDER;
+  const remaining = Math.max(0, ONE_OFF_MIN_ORDER - total);
 
   return (
     <AnimatePresence>
@@ -53,7 +56,8 @@ export default function CartDrawer() {
                 <div className="h-full flex flex-col items-center justify-center px-6 text-center">
                   <div className="text-6xl mb-6 opacity-30">🧃</div>
                   <p className="font-display text-xl mb-2">Nothing here yet.</p>
-                  <p className="text-sm opacity-60 mb-8">Pick a juice — or build one from scratch.</p>
+                  <p className="text-sm opacity-60 mb-2">Pick a juice — or build one from scratch.</p>
+                  <p className="text-xs opacity-50 mb-8">£{ONE_OFF_MIN_ORDER} minimum order for delivery</p>
                   <Link to="/menu" onClick={close} className="btn-primary">
                     Browse the menu
                   </Link>
@@ -115,10 +119,41 @@ export default function CartDrawer() {
                   <span className="text-sm opacity-60">Subtotal</span>
                   <span className="font-display text-2xl tabular-nums">£{total.toFixed(2)}</span>
                 </div>
-                <Link to="/checkout" onClick={close} className="btn-primary w-full">
-                  Checkout
-                  <span>→</span>
-                </Link>
+
+                {/* Minimum order indicator */}
+                {!meetsMinimum ? (
+                  <div className="mb-4 px-4 py-3 rounded-2xl bg-brand-melon/10 border border-brand-melon/20">
+                    <p className="text-sm font-medium text-brand-melon">
+                      Add £{remaining.toFixed(2)} more for delivery
+                    </p>
+                    <p className="text-xs opacity-70 mt-0.5">
+                      £{ONE_OFF_MIN_ORDER} minimum order
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mb-4 flex items-center gap-2 text-sm text-brand-green-deep">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span className="font-medium">Minimum reached — ready to checkout</span>
+                  </div>
+                )}
+
+                {meetsMinimum ? (
+                  <Link to="/checkout" onClick={close} className="btn-primary w-full">
+                    Checkout
+                    <span>→</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="btn-primary w-full opacity-50 cursor-not-allowed"
+                  >
+                    £{ONE_OFF_MIN_ORDER} minimum needed
+                  </button>
+                )}
+
                 <p className="text-center text-xs opacity-50 mt-3">
                   Delivered fresh, daily. Bracknell area.
                 </p>
