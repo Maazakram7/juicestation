@@ -28,6 +28,10 @@ router.post('/', async (req, res) => {
     if (typeof total !== 'number' || total < 0) {
       return res.status(400).json({ error: 'Invalid total.' });
     }
+    const MIN_ORDER_VALUE = 25;
+    if (total < MIN_ORDER_VALUE) {
+      return res.status(400).json({ error: `Minimum order is £${MIN_ORDER_VALUE}.` });
+    }
     if (!stripe) {
       return res.status(500).json({ error: 'Payment system not configured.' });
     }

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { ONE_OFF_MIN_ORDER } from '../data/subscriptions';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -115,8 +116,8 @@ export default function Checkout() {
 
             <button
               type="submit"
-              disabled={submitting}
-              className="btn-primary w-full mt-6 disabled:opacity-70 disabled:cursor-wait"
+              disabled={submitting || total < ONE_OFF_MIN_ORDER}
+              className="btn-primary w-full mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
@@ -134,7 +135,9 @@ export default function Checkout() {
                 </>
               ) : (
                 <>
-                  Pay £{total.toFixed(2)} securely
+                  {total < ONE_OFF_MIN_ORDER
+                    ? `Add £${(ONE_OFF_MIN_ORDER - total).toFixed(2)} more — £${ONE_OFF_MIN_ORDER} minimum`
+                    : `Pay £${total.toFixed(2)} securely`}
                   <span>→</span>
                 </>
               )}
@@ -171,7 +174,7 @@ export default function Checkout() {
         </div>
       </div>
     </div>
-  );
+  );f
 }
 
 function Field({ label, name, value, onChange, type = 'text', textarea, required }) {
