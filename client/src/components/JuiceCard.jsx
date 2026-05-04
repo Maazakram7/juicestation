@@ -49,13 +49,21 @@ export default function JuiceCard({ juice, index = 0 }) {
     updateQty(cartItemId, qtyInCart - 1);
   };
 
+  // Animate only the first 6 cards. After that, render instantly without animation.
+  // This eliminates flicker on fast scroll through long lists of cards.
+  const shouldAnimate = index < 6;
+
   return (
     <>
       <motion.article
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 0.45, delay: index * 0.03, ease: [0.2, 0.8, 0.2, 1] }}
+        {...(shouldAnimate
+          ? {
+              initial: { opacity: 0, y: 16 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.4, delay: index * 0.04, ease: [0.2, 0.8, 0.2, 1] },
+            }
+          : {})}
+        style={{ willChange: shouldAnimate ? 'transform, opacity' : 'auto' }}
         className="group relative rounded-[18px] md:rounded-[28px] overflow-hidden bg-white border border-black/[0.06] transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:shadow-xl md:hover:shadow-black/5 flex flex-col"
       >
         <div
@@ -63,7 +71,7 @@ export default function JuiceCard({ juice, index = 0 }) {
           aria-hidden="true"
         />
         <div className="p-4 sm:p-5 md:p-8 flex flex-col flex-1">
-          {/* Badge row — always rendered, invisible when no badges, to keep card heights aligned */}
+          {/* Badge row */}
           <div
             className={`flex flex-wrap gap-1 mb-2 md:mb-4 min-h-[20px] md:min-h-[24px] ${
               badges.length === 0 ? 'invisible' : ''
@@ -80,7 +88,6 @@ export default function JuiceCard({ juice, index = 0 }) {
                 </span>
               ))
             ) : (
-              // Invisible spacer to reserve badge height
               <span className="text-[8px] sm:text-[9px] md:text-[10px] px-1.5 sm:px-2 md:px-2.5 py-0.5 md:py-1">
                 &nbsp;
               </span>
@@ -96,12 +103,10 @@ export default function JuiceCard({ juice, index = 0 }) {
             />
           </h3>
 
-          {/* Tagline — reserve height so cards without tagline stay aligned */}
           <p className="text-[11px] sm:text-[13px] md:text-sm opacity-60 mb-3 md:mb-6 min-h-[16px] md:min-h-[20px]">
             {juice.tagline || '\u00A0'}
           </p>
 
-          {/* Ingredients — min-height for consistent wrapping */}
           <p
             className="text-[10px] sm:text-[12px] md:text-[13px] leading-relaxed opacity-75 mb-3 md:mb-6 border-l-2 pl-2 sm:pl-3 md:pl-4 py-0.5 md:py-1 min-h-[36px] sm:min-h-[42px] md:min-h-[48px]"
             style={{ borderColor: juice.accent }}
@@ -109,7 +114,6 @@ export default function JuiceCard({ juice, index = 0 }) {
             {juice.ingredients.join(' · ')}
           </p>
 
-          {/* Size selector — always rendered, invisible when only one size */}
           <div
             className={`flex items-center gap-1 mb-3 md:mb-5 p-0.5 md:p-1 rounded-full border border-current/10 w-fit ${
               hasMultipleSizes ? '' : 'invisible'
@@ -131,14 +135,12 @@ export default function JuiceCard({ juice, index = 0 }) {
                 </button>
               ))
             ) : (
-              // Invisible spacer matching the size selector's height
               <span className="text-[10px] sm:text-[11px] md:text-xs px-2 sm:px-2.5 md:px-3 py-1 md:py-1.5">
                 &nbsp;
               </span>
             )}
           </div>
 
-          {/* Price + quantity controls — pushed to bottom with mt-auto */}
           <div className="flex items-center justify-between gap-2 md:gap-3 pt-2 md:pt-4 border-t border-current/10 mt-auto">
             <span className="font-display text-base sm:text-xl md:text-2xl tabular-nums">
               £{price.toFixed(2)}
