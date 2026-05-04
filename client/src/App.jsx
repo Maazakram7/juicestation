@@ -12,6 +12,9 @@ import Subscribe from './pages/Subscribe';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import AdminOrders from './pages/AdminOrders';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import Allergens from './pages/Allergens';
 
 function PageTransition({ children }) {
   return (
@@ -45,6 +48,9 @@ export default function App() {
               <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
               <Route path="/order-success" element={<PageTransition><OrderSuccess /></PageTransition>} />
               <Route path="/admin/orders" element={<PageTransition><AdminOrders /></PageTransition>} />
+              <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+              <Route path="/terms" element={<PageTransition><TermsOfService /></PageTransition>} />
+              <Route path="/allergens" element={<PageTransition><Allergens /></PageTransition>} />
           </Routes>
           </AnimatePresence>
         </main>

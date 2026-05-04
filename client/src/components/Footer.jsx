@@ -32,7 +32,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li>Bracknell</li>
               <li>Berkshire, UK</li>
-              <li><a href="mailto:hello@juicestation.co.uk" className="hover:text-brand-green-deep transition-colors">hello@juicestation.co.uk</a></li>
+              <li><a href="mailto:hello@juiceestation.co.uk" className="hover:text-brand-green-deep transition-colors">hello@juiceestation.co.uk</a></li>
             </ul>
           </div>
 
@@ -76,9 +76,9 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-black/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs opacity-50">
           <p>© {new Date().getFullYear()} JUICEeSTATION. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:opacity-100 transition-opacity">Privacy</a>
-            <a href="#" className="hover:opacity-100 transition-opacity">Terms</a>
-            <a href="#" className="hover:opacity-100 transition-opacity">Allergens</a>
+            <Link to="/privacy" className="hover:opacity-100 transition-opacity">Privacy</Link>
+            <Link to="/terms" className="hover:opacity-100 transition-opacity">Terms</Link>
+            <Link to="/allergens" className="hover:opacity-100 transition-opacity">Allergens</Link>
           </div>
         </div>
       </div>
