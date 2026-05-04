@@ -275,7 +275,8 @@ function OrderCard({ order, onFulfill }) {
               <span className={`text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full ${statusColors[order.status] || 'bg-gray-100'}`}>
                 {statusLabels[order.status] || order.status}
               </span>
-              <span className="font-mono text-sm font-medium">{order.order_id}</span>
+              <span className="font-display text-base font-semibold tabular-nums">#{String(order.sequence_number || 0).padStart(5, '0')}</span>
+              <span className="font-mono text-xs opacity-50">{order.order_id}</span>
               <span className="text-xs opacity-50">{formatTime(order.created_at)}</span>
             </div>
             <p className="font-medium text-sm md:text-base truncate">{order.customer_name}</p>
