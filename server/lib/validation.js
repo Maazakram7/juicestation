@@ -17,10 +17,10 @@ const sanitizedString = (max) =>
 
 // UK phone number — accepts mobile and landline formats
 // Strict enough to reject obvious nonsense, lenient enough for genuine UK formats
-const ukPhoneRegex = /^(\+?44|0)[1-9]\d{8,10}$/;
+const ukPhoneRegex = /^[\d\s\+\-\(\)]{10,20}$/;
 
 // UK postcode — accepts both formatted (RG12 1AB) and unformatted (RG121AB)
-const ukPostcodeRegex = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/i;
+const ukPostcodeRegex = /^[A-Z\s\d]{5,10}$/i;
 
 // Customer base schema — used in orders, COD, and subscriptions
 const customerSchema = z
