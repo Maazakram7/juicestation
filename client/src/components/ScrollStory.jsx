@@ -19,12 +19,12 @@ function WordReveal({ children, progress, triggerAt, accent = false }) {
   // but with hard floor at 1 (visible) so fast scroll never makes it disappear
   const opacity = useTransform(
     progress,
-    [triggerAt - 0.02, triggerAt + 0.02, 1],
+    [triggerAt - 0.05, triggerAt + 0.05, 1],
     [0, 1, 1]
   );
   const y = useTransform(
     progress,
-    [triggerAt - 0.02, triggerAt + 0.02, 1],
+    [triggerAt - 0.05, triggerAt + 0.05, 1],
     [40, 0, 0]
   );
 
@@ -129,9 +129,9 @@ function DesktopScrollStory() {
   // Heavier, slower spring — Apple-like weighted feel
   // Lower stiffness + higher mass = smoother on fast scroll, no skip
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 50,
-    damping: 22,
-    mass: 0.8,
+    stiffness: 25,
+    damping: 30,
+    mass: 1.5,
     restDelta: 0.0005,
   });
 
@@ -143,7 +143,7 @@ function DesktopScrollStory() {
       ref={sectionRef}
       className="relative bg-brand-cream"
       style={{
-        height: '320vh',
+        height: '400vh',
         contain: 'layout style paint',
       }}
       aria-label="Fresh ingredients, cold-pressed"
@@ -173,17 +173,17 @@ function DesktopScrollStory() {
 
         <div className="relative z-20 h-full flex items-center justify-center px-10">
           <h2 className="font-display text-center text-[7vw] lg:text-[6vw] leading-[0.95] tracking-tight max-w-[18ch]">
-            <WordReveal progress={smoothProgress} triggerAt={0.10}>Fresh</WordReveal>
-            <WordReveal progress={smoothProgress} triggerAt={0.18}>fruit.</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.12}>Fresh</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.22}>fruit.</WordReveal>
             <br />
-            <WordReveal progress={smoothProgress} triggerAt={0.32}>Raw</WordReveal>
-            <WordReveal progress={smoothProgress} triggerAt={0.40} accent>vegetables.</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.38}>Raw</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.48} accent>vegetables.</WordReveal>
             <br />
-            <WordReveal progress={smoothProgress} triggerAt={0.55}>Nothing</WordReveal>
-            <WordReveal progress={smoothProgress} triggerAt={0.63}>added.</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.62}>Nothing</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.72}>added.</WordReveal>
             <br />
-            <WordReveal progress={smoothProgress} triggerAt={0.78}>Nothing</WordReveal>
-            <WordReveal progress={smoothProgress} triggerAt={0.86} accent>hidden.</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.84}>Nothing</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.94} accent>hidden.</WordReveal>
           </h2>
         </div>
 
