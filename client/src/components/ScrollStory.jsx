@@ -57,11 +57,11 @@ function MobileScrollStory() {
     <section
       ref={sectionRef}
       className="relative bg-brand-cream overflow-hidden"
-      style={{ minHeight: '100vh' }}
+      style={{ minHeight: '70vh' }}
       aria-label="Fresh ingredients, cold-pressed"
     >
-      <div className="relative h-screen w-full flex items-center justify-center">
-        <div className="absolute top-10 left-0 right-0 z-30 flex justify-between items-center px-5 text-[9px] uppercase tracking-[0.3em] opacity-50">
+      <div className="relative h-[70vh] w-full flex items-center justify-center">
+       <div className="absolute top-6 left-0 right-0 z-30 flex justify-between items-center px-5 text-[9px] uppercase tracking-[0.3em] opacity-50">
           <span>The Process</span>
         </div>
 
