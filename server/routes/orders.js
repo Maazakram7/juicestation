@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { supabase } from '../lib/supabase.js';
 import { stripe } from '../lib/stripe.js';
+import { sendCustomerConfirmation, sendOwnerNotification } from '../lib/mailer.js';
 
 const router = Router();
+
+const MIN_ORDER_VALUE = 25;
 
 function generateOrderId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -15,6 +18,7 @@ function getClientBase() {
   return process.env.CLIENT_ORIGIN?.split(',')[0] || 'http://localhost:5173';
 }
 
+// Online payment via Stripe
 router.post('/', async (req, res) => {
   try {
     const { customer, items, total } = req.body;
@@ -28,7 +32,6 @@ router.post('/', async (req, res) => {
     if (typeof total !== 'number' || total < 0) {
       return res.status(400).json({ error: 'Invalid total.' });
     }
-    const MIN_ORDER_VALUE = 25;
     if (total < MIN_ORDER_VALUE) {
       return res.status(400).json({ error: `Minimum order is £${MIN_ORDER_VALUE}.` });
     }
@@ -60,6 +63,7 @@ router.post('/', async (req, res) => {
         items,
         total,
         status: 'pending',
+        payment_method: 'online',
       })
       .select()
       .single();
@@ -106,6 +110,80 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     console.error('[orders] unexpected error:', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// Cash on delivery — same validation, no Stripe
+router.post('/cod', async (req, res) => {
+  try {
+    const { customer, items, total } = req.body;
+
+    if (!customer || !customer.email || !customer.name || !customer.address) {
+      return res.status(400).json({ error: 'Missing customer details.' });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty.' });
+    }
+    if (typeof total !== 'number' || total < 0) {
+      return res.status(400).json({ error: 'Invalid total.' });
+    }
+    if (total < MIN_ORDER_VALUE) {
+      return res.status(400).json({ error: `Minimum order is £${MIN_ORDER_VALUE}.` });
+    }
+
+    const order_id = generateOrderId();
+
+    try {
+      await supabase.from('users').upsert({
+        email: customer.email,
+        name: customer.name,
+        phone: customer.phone || null,
+      }, { onConflict: 'email' });
+    } catch (e) {
+      console.warn('[orders/cod] user upsert failed, continuing:', e.message);
+    }
+
+    const { data: order, error: insertError } = await supabase
+      .from('orders')
+      .insert({
+        order_id,
+        customer_name: customer.name,
+        customer_email: customer.email,
+        customer_phone: customer.phone || null,
+        delivery_address: customer.address,
+        notes: customer.notes || null,
+        items,
+        total,
+        status: 'pending_cod',
+        payment_method: 'cod',
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('[orders/cod] insert error:', insertError);
+      return res.status(500).json({ error: 'Could not save order.' });
+    }
+
+    if (order) {
+      order.is_cod = true;
+      sendCustomerConfirmation(order).catch((err) =>
+        console.error('[orders/cod] customer email failed:', err)
+      );
+      sendOwnerNotification(order).catch((err) =>
+        console.error('[orders/cod] owner email failed:', err)
+      );
+    }
+
+    res.status(201).json({
+      order_id: order.order_id,
+      status: order.status,
+      total: order.total,
+      payment_method: 'cod',
+    });
+  } catch (err) {
+    console.error('[orders/cod] unexpected error:', err);
     res.status(500).json({ error: err.message || 'Server error.' });
   }
 });
