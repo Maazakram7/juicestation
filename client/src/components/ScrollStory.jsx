@@ -12,18 +12,20 @@ function useIsMobile() {
   return isMobile;
 }
 
-function MobileSequencer() {
+function MobileScrollStory() {
   const sectionRef = useRef(null);
-  const [phase, setPhase] = useState(-1);
-  const [inView, setInView] = useState(false);
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
 
-  const LINE_DURATION = 1800;
-
-  const lines = [
-    { text: 'Fresh fruit.', accent: false },
-    { text: 'Raw vegetables.', accent: true },
-    { text: 'Nothing added.', accent: false },
-    { text: 'Nothing hidden.', accent: true },
+  const words = [
+    { text: 'Fresh', accent: false },
+    { text: 'fruit.', accent: false, lineEnd: true },
+    { text: 'Raw', accent: false },
+    { text: 'vegetables.', accent: true, lineEnd: true },
+    { text: 'Nothing', accent: false },
+    { text: 'added.', accent: false, lineEnd: true },
+    { text: 'Nothing', accent: false },
+    { text: 'hidden.', accent: true, lineEnd: true },
   ];
 
   useEffect(() => {
@@ -32,59 +34,77 @@ function MobileSequencer() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-            setInView(true);
-          } else if (!entry.isIntersecting) {
-            setInView(false);
+          if (entry.isIntersecting && entry.intersectionRatio > 0.3 && !hasStarted) {
+            setHasStarted(true);
           }
         });
       },
-      { threshold: [0, 0.5, 1] }
+      { threshold: [0, 0.3, 0.6] }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [hasStarted]);
 
   useEffect(() => {
-    if (!inView) return;
-    let currentPhase = 0;
-    setPhase(0);
-    const interval = setInterval(() => {
-      currentPhase = (currentPhase + 1) % lines.length;
-      setPhase(currentPhase);
-    }, LINE_DURATION);
-    return () => clearInterval(interval);
-  }, [inView]);
-
-  const currentLine = phase >= 0 ? lines[phase] : null;
+    if (!hasStarted || revealedCount >= words.length) return;
+    const timeout = setTimeout(() => {
+      setRevealedCount((c) => c + 1);
+    }, 450);
+    return () => clearTimeout(timeout);
+  }, [hasStarted, revealedCount]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative bg-brand-cream h-[60vh] overflow-hidden"
+      className="relative bg-brand-cream overflow-hidden"
+      style={{ minHeight: '100vh' }}
       aria-label="Fresh ingredients, cold-pressed"
     >
-      <div className="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-5 pt-10 text-[9px] uppercase tracking-[0.3em] opacity-50">
-        <span>The Process</span>
-      </div>
+      <div className="relative h-screen w-full flex items-center justify-center">
+        <div className="absolute top-10 left-0 right-0 z-30 flex justify-between items-center px-5 text-[9px] uppercase tracking-[0.3em] opacity-50">
+          <span>The Process</span>
+        </div>
 
-      <div className="absolute inset-0 z-20">
-        <AnimatePresence mode="wait">
-          {currentLine && (
-            <motion.div
-              key={phase}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-              className="absolute inset-0 flex items-center justify-center px-6"
-            >
-              <h2 className="font-display text-center text-[18vw] leading-[0.95] tracking-[-0.03em] max-w-[10ch]">
-                {currentLine.accent ? <em className="not-italic">{currentLine.text}</em> : currentLine.text}
-              </h2>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          aria-hidden="true"
+        >
+          <div
+            className="w-[80%] h-[80%] rounded-full opacity-15"
+            style={{
+              background: 'radial-gradient(circle, #7DC242 0%, #F39324 40%, #E94E4E 70%, transparent 100%)',
+              filter: 'blur(50px)',
+            }}
+          />
+        </div>
+
+        <div className="relative z-20 px-6 w-full">
+          <h2 className="font-display text-center text-[10vw] leading-[1.05] tracking-tight">
+            {words.map((word, i) => (
+              <span key={i}>
+                <span className="inline-block overflow-hidden align-bottom mr-2">
+                  <motion.span
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={
+                      revealedCount > i
+                        ? { y: 0, opacity: 1 }
+                        : { y: 50, opacity: 0 }
+                    }
+                    transition={{
+                      duration: 0.6,
+                      ease: [0.2, 0.8, 0.2, 1],
+                    }}
+                    className={`inline-block ${word.accent ? 'text-brand-green-deep' : ''}`}
+                    style={{ willChange: 'transform, opacity' }}
+                  >
+                    {word.text}
+                  </motion.span>
+                </span>
+                {word.lineEnd && i < words.length - 1 && <br />}
+              </span>
+            ))}
+          </h2>
+        </div>
       </div>
     </section>
   );
@@ -106,7 +126,6 @@ function DesktopScrollStory() {
     { text: 'hidden.', accent: true, lineEnd: true },
   ];
 
-  // Trigger reveal sequence when section enters view
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -125,13 +144,12 @@ function DesktopScrollStory() {
     return () => observer.disconnect();
   }, [hasStarted]);
 
-  // Once started, reveal one word at a time on a steady timer
   useEffect(() => {
     if (!hasStarted || revealedCount >= words.length) return;
 
     const timeout = setTimeout(() => {
       setRevealedCount((c) => c + 1);
-    }, 500); // 500ms between each word
+    }, 500);
 
     return () => clearTimeout(timeout);
   }, [hasStarted, revealedCount]);
@@ -155,7 +173,6 @@ function DesktopScrollStory() {
           <span className="font-mono">Fresh &middot; Raw &middot; Cold-pressed</span>
         </div>
 
-        {/* Static gradient backdrop */}
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           aria-hidden="true"
@@ -197,10 +214,9 @@ function DesktopScrollStory() {
           </h2>
         </div>
 
-        {/* Static marquee at bottom */}
         <div className="absolute bottom-14 left-0 right-0 z-20 whitespace-nowrap pointer-events-none select-none overflow-hidden">
           <div
-            className="flex gap-16 text-sm uppercase tracking-[0.3em] opacity-40 animate-marquee"
+            className="flex gap-16 text-sm uppercase tracking-[0.3em] opacity-40"
             style={{
               willChange: 'transform',
               animation: 'marquee 60s linear infinite',
@@ -232,5 +248,5 @@ function DesktopScrollStory() {
 
 export default function ScrollStory() {
   const isMobile = useIsMobile();
-  return isMobile ? <MobileSequencer /> : <DesktopScrollStory />;
+  return isMobile ? <MobileScrollStory /> : <DesktopScrollStory />;
 }
