@@ -14,7 +14,6 @@ export default function AdminOrders() {
   };
 
   const handleLogout = () => {
-    console.log('Signing out...');
     sessionStorage.removeItem(STORAGE_KEY);
     window.location.href = '/admin/orders';
   };
@@ -129,12 +128,15 @@ function Dashboard({ token, onLogout }) {
 
   const filtered = orders.filter((o) => {
     if (filter === 'all') return true;
+    if (filter === 'active') return o.status === 'paid' || o.status === 'pending_cod';
     return o.status === filter;
   });
 
   const counts = {
     all: orders.length,
+    active: orders.filter((o) => o.status === 'paid' || o.status === 'pending_cod').length,
     paid: orders.filter((o) => o.status === 'paid').length,
+    pending_cod: orders.filter((o) => o.status === 'pending_cod').length,
     pending: orders.filter((o) => o.status === 'pending').length,
     fulfilled: orders.filter((o) => o.status === 'fulfilled').length,
   };
@@ -152,7 +154,6 @@ function Dashboard({ token, onLogout }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Sign out clicked');
               onLogout();
             }}
             style={{ position: 'relative', zIndex: 100 }}
@@ -165,8 +166,10 @@ function Dashboard({ token, onLogout }) {
         <div className="flex flex-wrap gap-2 mb-6">
           {[
             { id: 'all', label: 'All' },
-            { id: 'paid', label: 'Paid' },
-            { id: 'pending', label: 'Pending' },
+            { id: 'active', label: 'To deliver' },
+            { id: 'paid', label: 'Paid online' },
+            { id: 'pending_cod', label: 'Cash on delivery' },
+            { id: 'pending', label: 'Pending payment' },
             { id: 'fulfilled', label: 'Fulfilled' },
           ].map((f) => (
             <button
@@ -187,7 +190,7 @@ function Dashboard({ token, onLogout }) {
 
         {lastFetch && (
           <p className="text-xs opacity-40 mb-4">
-            Last updated: {lastFetch.toLocaleTimeString()} (auto-refreshes every 30s)
+            Last updated: {lastFetch.toLocaleTimeString()} (auto-refreshes every 30s) — tap any order to expand
           </p>
         )}
 
@@ -200,7 +203,7 @@ function Dashboard({ token, onLogout }) {
         {loading ? (
           <p className="text-center py-20 opacity-50">Loading orders...</p>
         ) : filtered.length === 0 ? (
-          <p className="text-center py-20 opacity-50">No orders {filter !== 'all' ? `with status: ${filter}` : 'yet'}.</p>
+          <p className="text-center py-20 opacity-50">No orders {filter !== 'all' ? `with this status` : 'yet'}.</p>
         ) : (
           <div className="space-y-4">
             <AnimatePresence>
@@ -220,9 +223,18 @@ function OrderCard({ order, onFulfill }) {
 
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
+    pending_cod: 'bg-orange-100 text-orange-800',
     paid: 'bg-brand-green/15 text-brand-green-deep',
     fulfilled: 'bg-gray-200 text-gray-600',
     cancelled: 'bg-brand-melon/15 text-brand-melon',
+  };
+
+  const statusLabels = {
+    pending: 'pending payment',
+    pending_cod: 'cash on delivery',
+    paid: 'paid',
+    fulfilled: 'fulfilled',
+    cancelled: 'cancelled',
   };
 
   const formatTime = (iso) => {
@@ -239,6 +251,8 @@ function OrderCard({ order, onFulfill }) {
     if (diffDay < 7) return `${diffDay}d ago`;
     return d.toLocaleDateString();
   };
+
+  const canFulfill = order.status === 'paid' || order.status === 'pending_cod';
 
   return (
     <motion.div
@@ -259,16 +273,19 @@ function OrderCard({ order, onFulfill }) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className={`text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full ${statusColors[order.status] || 'bg-gray-100'}`}>
-                {order.status}
+                {statusLabels[order.status] || order.status}
               </span>
               <span className="font-mono text-sm font-medium">{order.order_id}</span>
               <span className="text-xs opacity-50">{formatTime(order.created_at)}</span>
             </div>
             <p className="font-medium text-sm md:text-base truncate">{order.customer_name}</p>
-            <p className="text-xs opacity-60 truncate">{order.items.reduce((s, i) => s + i.qty, 0)} items</p>
+            <p className="text-xs opacity-60 truncate">{order.items.reduce((s, i) => s + i.qty, 0)} items · tap to expand</p>
           </div>
           <div className="text-right flex-shrink-0">
             <p className="font-display text-xl md:text-2xl tabular-nums">£{Number(order.total).toFixed(2)}</p>
+            {order.status === 'pending_cod' && (
+              <p className="text-[10px] uppercase tracking-wider text-orange-700 font-medium mt-1">Collect cash</p>
+            )}
           </div>
         </div>
       </div>
@@ -308,7 +325,7 @@ function OrderCard({ order, onFulfill }) {
                         {item.name}
                         {item.meta && <span className="opacity-50 text-xs"> ({item.meta})</span>}
                       </span>
-                      <span className="opacity-60 tabular-nums">x{item.qty} - £{(item.price * item.qty).toFixed(2)}</span>
+                      <span className="opacity-60 tabular-nums">x{item.qty} · £{(item.price * item.qty).toFixed(2)}</span>
                     </li>
                   ))}
                 </ul>
@@ -326,7 +343,7 @@ function OrderCard({ order, onFulfill }) {
                 </div>
               )}
 
-              {order.status === 'paid' && (
+              {canFulfill && (
                 <button
                   type="button"
                   onClick={(e) => {
@@ -336,8 +353,14 @@ function OrderCard({ order, onFulfill }) {
                   }}
                   className="btn-primary w-full text-sm"
                 >
-                  Mark as fulfilled
+                  {order.status === 'pending_cod' ? 'Mark delivered & cash collected' : 'Mark as fulfilled'}
                 </button>
+              )}
+
+              {order.status === 'pending' && (
+                <p className="text-xs text-center opacity-60 italic">
+                  Awaiting Stripe payment confirmation. Customer will be charged once they complete checkout.
+                </p>
               )}
 
               {order.status === 'fulfilled' && order.fulfilled_at && (
