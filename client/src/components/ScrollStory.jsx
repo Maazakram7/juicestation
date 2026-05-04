@@ -12,44 +12,31 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Single line that fades in, holds, fades out as scroll progresses through its range
-function ScrollLine({ children, progress, range, accent = false }) {
-  const [start, end] = range;
-  const fadeIn = start;
-  const fullyIn = start + (end - start) * 0.25;
-  const fullyOut = start + (end - start) * 0.75;
-  const fadeOut = end;
-
+// Each word fades up and STAYS visible once revealed.
+// triggerAt = scroll progress (0-1) at which the word should appear.
+function WordReveal({ children, progress, triggerAt, accent = false }) {
+  // Reveal animation spans only 4% of scroll — short enough to feel snappy,
+  // but with hard floor at 1 (visible) so fast scroll never makes it disappear
   const opacity = useTransform(
     progress,
-    [fadeIn, fullyIn, fullyOut, fadeOut],
-    [0, 1, 1, 0]
+    [triggerAt - 0.02, triggerAt + 0.02, 1],
+    [0, 1, 1]
   );
-
   const y = useTransform(
     progress,
-    [fadeIn, fullyIn, fullyOut, fadeOut],
-    [40, 0, 0, -40]
+    [triggerAt - 0.02, triggerAt + 0.02, 1],
+    [40, 0, 0]
   );
 
   return (
-    <motion.div
-      style={{
-        opacity,
-        y,
-        willChange: 'transform, opacity',
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0 2.5rem',
-      }}
-    >
-      <h2 className="font-display text-center text-[7vw] lg:text-[6vw] leading-[0.95] tracking-tight max-w-[18ch]">
-        {accent ? <em className="not-italic text-brand-green-deep">{children}</em> : children}
-      </h2>
-    </motion.div>
+    <span className="inline-block overflow-hidden align-bottom mr-3 md:mr-5">
+      <motion.span
+        style={{ y, opacity, willChange: 'transform, opacity' }}
+        className={`inline-block ${accent ? 'text-brand-green-deep' : ''}`}
+      >
+        {children}
+      </motion.span>
+    </span>
   );
 }
 
@@ -139,12 +126,13 @@ function DesktopScrollStory() {
     offset: ['start start', 'end end'],
   });
 
-  // Buttery smooth spring — Apple-like weighted feel
+  // Heavier, slower spring — Apple-like weighted feel
+  // Lower stiffness + higher mass = smoother on fast scroll, no skip
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 60,
-    damping: 24,
-    mass: 0.6,
-    restDelta: 0.001,
+    stiffness: 50,
+    damping: 22,
+    mass: 0.8,
+    restDelta: 0.0005,
   });
 
   const marqueeX = useTransform(smoothProgress, [0, 1], ['0%', '-40%']);
@@ -169,7 +157,6 @@ function DesktopScrollStory() {
           <span className="font-mono">Fresh &middot; Raw &middot; Cold-pressed</span>
         </div>
 
-        {/* Static gradient — no rotation, no perf cost */}
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           aria-hidden="true"
@@ -180,25 +167,24 @@ function DesktopScrollStory() {
             style={{
               background: 'radial-gradient(circle, #7DC242 0%, #F39324 40%, #E94E4E 70%, transparent 100%)',
               filter: 'blur(60px)',
-              willChange: 'auto',
             }}
           />
         </div>
 
-        {/* Lines container — each line crossfades through its scroll range */}
-        <div className="relative z-20 h-full">
-          <ScrollLine progress={smoothProgress} range={[0.05, 0.30]}>
-            Fresh fruit.
-          </ScrollLine>
-          <ScrollLine progress={smoothProgress} range={[0.28, 0.53]} accent>
-            Raw vegetables.
-          </ScrollLine>
-          <ScrollLine progress={smoothProgress} range={[0.51, 0.76]}>
-            Nothing added.
-          </ScrollLine>
-          <ScrollLine progress={smoothProgress} range={[0.74, 0.99]} accent>
-            Nothing hidden.
-          </ScrollLine>
+        <div className="relative z-20 h-full flex items-center justify-center px-10">
+          <h2 className="font-display text-center text-[7vw] lg:text-[6vw] leading-[0.95] tracking-tight max-w-[18ch]">
+            <WordReveal progress={smoothProgress} triggerAt={0.10}>Fresh</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.18}>fruit.</WordReveal>
+            <br />
+            <WordReveal progress={smoothProgress} triggerAt={0.32}>Raw</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.40} accent>vegetables.</WordReveal>
+            <br />
+            <WordReveal progress={smoothProgress} triggerAt={0.55}>Nothing</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.63}>added.</WordReveal>
+            <br />
+            <WordReveal progress={smoothProgress} triggerAt={0.78}>Nothing</WordReveal>
+            <WordReveal progress={smoothProgress} triggerAt={0.86} accent>hidden.</WordReveal>
+          </h2>
         </div>
 
         <motion.div
