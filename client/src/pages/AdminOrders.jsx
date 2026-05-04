@@ -59,7 +59,7 @@ function LoginScreen({ onAuth }) {
     <div className="min-h-screen flex items-center justify-center bg-brand-cream px-6">
       <div className="max-w-sm w-full">
         <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-3 text-center">Admin</p>
-        <h1 className="font-display text-3xl mb-8 text-center">Order dashboard</h1>
+        <h1 className="font-display text-3xl mb-8 text-center">Dashboard</h1>
         <form onSubmit={tryLogin} className="space-y-3">
           <input
             type="password"
@@ -81,6 +81,64 @@ function LoginScreen({ onAuth }) {
 }
 
 function Dashboard({ token, onLogout }) {
+  const [tab, setTab] = useState('orders');
+
+  return (
+    <div className="min-h-screen bg-brand-cream pt-8 pb-24">
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] opacity-50">Admin</p>
+            <h1 className="font-display text-3xl md:text-4xl">Dashboard</h1>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onLogout();
+            }}
+            style={{ position: 'relative', zIndex: 100 }}
+            className="text-sm uppercase tracking-wider px-5 py-3 rounded-full border-2 border-brand-charcoal hover:bg-brand-charcoal hover:text-brand-cream transition-all font-medium cursor-pointer"
+          >
+            Sign out
+          </button>
+        </div>
+
+        {/* Main tabs */}
+        <div className="flex gap-2 mb-8 border-b border-black/10">
+          <TabButton active={tab === 'orders'} onClick={() => setTab('orders')}>
+            Orders
+          </TabButton>
+          <TabButton active={tab === 'subscriptions'} onClick={() => setTab('subscriptions')}>
+            Subscriptions
+          </TabButton>
+        </div>
+
+        {tab === 'orders' && <OrdersTab token={token} />}
+        {tab === 'subscriptions' && <SubscriptionsTab token={token} />}
+      </div>
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-5 py-3 text-sm font-medium tracking-wide transition-all border-b-2 -mb-[2px] ${
+        active
+          ? 'border-brand-charcoal text-brand-charcoal'
+          : 'border-transparent opacity-50 hover:opacity-100'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function OrdersTab({ token }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -142,79 +200,192 @@ function Dashboard({ token, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-brand-cream pt-8 pb-24">
-      <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] opacity-50">Admin</p>
-            <h1 className="font-display text-3xl md:text-4xl">Orders</h1>
-          </div>
+    <>
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[
+          { id: 'all', label: 'All' },
+          { id: 'active', label: 'To deliver' },
+          { id: 'paid', label: 'Paid online' },
+          { id: 'pending_cod', label: 'Cash on delivery' },
+          { id: 'pending', label: 'Pending payment' },
+          { id: 'fulfilled', label: 'Fulfilled' },
+        ].map((f) => (
           <button
+            key={f.id}
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onLogout();
-            }}
-            style={{ position: 'relative', zIndex: 100 }}
-            className="text-sm uppercase tracking-wider px-5 py-3 rounded-full border-2 border-brand-charcoal hover:bg-brand-charcoal hover:text-brand-cream transition-all font-medium cursor-pointer"
+            onClick={() => setFilter(f.id)}
+            className={`px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
+              filter === f.id
+                ? 'bg-brand-charcoal text-brand-cream'
+                : 'border border-current/15 hover:border-current/40 opacity-70 hover:opacity-100'
+            }`}
           >
-            Sign out
+            {f.label}
+            <span className="ml-2 text-xs opacity-60">{counts[f.id]}</span>
           </button>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { id: 'all', label: 'All' },
-            { id: 'active', label: 'To deliver' },
-            { id: 'paid', label: 'Paid online' },
-            { id: 'pending_cod', label: 'Cash on delivery' },
-            { id: 'pending', label: 'Pending payment' },
-            { id: 'fulfilled', label: 'Fulfilled' },
-          ].map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setFilter(f.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
-                filter === f.id
-                  ? 'bg-brand-charcoal text-brand-cream'
-                  : 'border border-current/15 hover:border-current/40 opacity-70 hover:opacity-100'
-              }`}
-            >
-              {f.label}
-              <span className="ml-2 text-xs opacity-60">{counts[f.id]}</span>
-            </button>
-          ))}
-        </div>
-
-        {lastFetch && (
-          <p className="text-xs opacity-40 mb-4">
-            Last updated: {lastFetch.toLocaleTimeString()} (auto-refreshes every 30s) — tap any order to expand
-          </p>
-        )}
-
-        {error && (
-          <div className="mb-4 p-4 rounded-2xl bg-brand-melon/10 text-brand-melon text-sm">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <p className="text-center py-20 opacity-50">Loading orders...</p>
-        ) : filtered.length === 0 ? (
-          <p className="text-center py-20 opacity-50">No orders {filter !== 'all' ? `with this status` : 'yet'}.</p>
-        ) : (
-          <div className="space-y-4">
-            <AnimatePresence>
-              {filtered.map((order) => (
-                <OrderCard key={order.order_id} order={order} onFulfill={fulfillOrder} />
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+        ))}
       </div>
-    </div>
+
+      {lastFetch && (
+        <p className="text-xs opacity-40 mb-4">
+          Last updated: {lastFetch.toLocaleTimeString()} (auto-refreshes every 30s) — tap any order to expand
+        </p>
+      )}
+
+      {error && (
+        <div className="mb-4 p-4 rounded-2xl bg-brand-melon/10 text-brand-melon text-sm">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <p className="text-center py-20 opacity-50">Loading orders...</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-center py-20 opacity-50">No orders {filter !== 'all' ? `with this status` : 'yet'}.</p>
+      ) : (
+        <div className="space-y-4">
+          <AnimatePresence>
+            {filtered.map((order) => (
+              <OrderCard key={order.order_id} order={order} onFulfill={fulfillOrder} />
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </>
+  );
+}
+
+function SubscriptionsTab({ token }) {
+  const [subs, setSubs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [lastFetch, setLastFetch] = useState(null);
+
+  const fetchSubs = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/admin/subscriptions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Could not fetch subscriptions');
+      const data = await res.json();
+      setSubs(data.subscriptions || []);
+      setLastFetch(new Date());
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchSubs();
+    const interval = setInterval(fetchSubs, 30000);
+    return () => clearInterval(interval);
+  }, [fetchSubs]);
+
+  const activateSub = async (subscriptionId) => {
+    try {
+      const res = await fetch(`${API_URL}/admin/subscriptions/${subscriptionId}/activate`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Could not activate');
+      }
+      await fetchSubs();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  };
+
+  const cancelSub = async (subscriptionId) => {
+    if (!confirm('Cancel this subscription? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`${API_URL}/admin/subscriptions/${subscriptionId}/cancel`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Could not cancel');
+      }
+      await fetchSubs();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  };
+
+  const filtered = subs.filter((s) => {
+    if (filter === 'all') return true;
+    return s.status === filter;
+  });
+
+  const counts = {
+    all: subs.length,
+    pending: subs.filter((s) => s.status === 'pending').length,
+    active: subs.filter((s) => s.status === 'active').length,
+    cancelled: subs.filter((s) => s.status === 'cancelled').length,
+  };
+
+  return (
+    <>
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[
+          { id: 'all', label: 'All' },
+          { id: 'pending', label: 'New requests' },
+          { id: 'active', label: 'Active' },
+          { id: 'cancelled', label: 'Cancelled' },
+        ].map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setFilter(f.id)}
+            className={`px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
+              filter === f.id
+                ? 'bg-brand-charcoal text-brand-cream'
+                : 'border border-current/15 hover:border-current/40 opacity-70 hover:opacity-100'
+            }`}
+          >
+            {f.label}
+            <span className="ml-2 text-xs opacity-60">{counts[f.id]}</span>
+          </button>
+        ))}
+      </div>
+
+      {lastFetch && (
+        <p className="text-xs opacity-40 mb-4">
+          Last updated: {lastFetch.toLocaleTimeString()} — tap any subscription to expand
+        </p>
+      )}
+
+      {error && (
+        <div className="mb-4 p-4 rounded-2xl bg-brand-melon/10 text-brand-melon text-sm">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <p className="text-center py-20 opacity-50">Loading subscriptions...</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-center py-20 opacity-50">No subscriptions {filter !== 'all' ? `with this status` : 'yet'}.</p>
+      ) : (
+        <div className="space-y-4">
+          <AnimatePresence>
+            {filtered.map((sub) => (
+              <SubscriptionCard
+                key={sub.subscription_id}
+                sub={sub}
+                onActivate={activateSub}
+                onCancel={cancelSub}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -235,21 +406,6 @@ function OrderCard({ order, onFulfill }) {
     paid: 'paid',
     fulfilled: 'fulfilled',
     cancelled: 'cancelled',
-  };
-
-  const formatTime = (iso) => {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const now = new Date();
-    const diffMs = now - d;
-    const diffMin = Math.floor(diffMs / 60000);
-    const diffHr = Math.floor(diffMs / 3600000);
-    const diffDay = Math.floor(diffMs / 86400000);
-    if (diffMin < 1) return 'just now';
-    if (diffMin < 60) return `${diffMin}m ago`;
-    if (diffHr < 24) return `${diffHr}h ago`;
-    if (diffDay < 7) return `${diffDay}d ago`;
-    return d.toLocaleDateString();
   };
 
   const canFulfill = order.status === 'paid' || order.status === 'pending_cod';
@@ -360,7 +516,7 @@ function OrderCard({ order, onFulfill }) {
 
               {order.status === 'pending' && (
                 <p className="text-xs text-center opacity-60 italic">
-                  Awaiting Stripe payment confirmation. Customer will be charged once they complete checkout.
+                  Awaiting Stripe payment confirmation.
                 </p>
               )}
 
@@ -375,4 +531,193 @@ function OrderCard({ order, onFulfill }) {
       </AnimatePresence>
     </motion.div>
   );
+}
+
+function SubscriptionCard({ sub, onActivate, onCancel }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const statusColors = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    active: 'bg-brand-green/15 text-brand-green-deep',
+    cancelled: 'bg-gray-200 text-gray-600',
+    paused: 'bg-orange-100 text-orange-800',
+  };
+
+  const statusLabels = {
+    pending: 'new request',
+    active: 'active',
+    cancelled: 'cancelled',
+    paused: 'paused',
+  };
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden"
+    >
+      <div
+        onClick={() => setExpanded(!expanded)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(!expanded); }}
+        className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors cursor-pointer"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <span className={`text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full ${statusColors[sub.status] || 'bg-gray-100'}`}>
+                {statusLabels[sub.status] || sub.status}
+              </span>
+              <span className="font-mono text-xs opacity-50">{sub.subscription_id}</span>
+              <span className="text-xs opacity-50">{formatTime(sub.created_at)}</span>
+            </div>
+            <p className="font-medium text-sm md:text-base truncate">{sub.customer_name}</p>
+            <p className="text-xs opacity-60 truncate">{sub.tier_name} · tap to expand</p>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <p className="font-display text-xl md:text-2xl tabular-nums">£{Number(sub.price_per_week).toFixed(2)}</p>
+            <p className="text-[10px] uppercase tracking-wider opacity-50 mt-1">per week</p>
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-black/[0.06] pt-4 space-y-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Contact</p>
+                <p className="text-sm">
+                  <a href={`mailto:${sub.customer_email}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
+                    {sub.customer_email}
+                  </a>
+                </p>
+                {sub.customer_phone && (
+                  <p className="text-sm">
+                    <a href={`tel:${sub.customer_phone}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
+                      {sub.customer_phone}
+                    </a>
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Plan</p>
+                <p className="text-sm font-medium">{sub.tier_name}</p>
+                <p className="text-sm opacity-60">£{Number(sub.price_per_week).toFixed(2)} per week</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Postcode</p>
+                <p className="text-sm">{sub.delivery_postcode}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Delivery to</p>
+                <p className="text-sm whitespace-pre-line">{sub.delivery_address}</p>
+              </div>
+
+              {sub.juice_preference && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Juice preference</p>
+                  <p className="text-sm">{sub.juice_preference}</p>
+                </div>
+              )}
+
+              {sub.preferred_start_date && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Preferred start date</p>
+                  <p className="text-sm">{sub.preferred_start_date}</p>
+                </div>
+              )}
+
+              {sub.notes && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Notes</p>
+                  <p className="text-sm italic opacity-80">"{sub.notes}"</p>
+                </div>
+              )}
+
+              {sub.status === 'pending' && (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onActivate(sub.subscription_id);
+                    }}
+                    className="btn-primary flex-1 text-sm"
+                  >
+                    Mark as active
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onCancel(sub.subscription_id);
+                    }}
+                    className="px-5 py-3 rounded-full border-2 border-brand-melon text-brand-melon hover:bg-brand-melon hover:text-white transition-colors text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {sub.status === 'active' && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onCancel(sub.subscription_id);
+                  }}
+                  className="w-full px-5 py-3 rounded-full border-2 border-brand-melon text-brand-melon hover:bg-brand-melon hover:text-white transition-colors text-sm font-medium"
+                >
+                  Cancel subscription
+                </button>
+              )}
+
+              {sub.status === 'active' && sub.activated_at && (
+                <p className="text-xs opacity-50 text-center">
+                  Active since {formatTime(sub.activated_at)}
+                </p>
+              )}
+
+              {sub.status === 'cancelled' && sub.cancelled_at && (
+                <p className="text-xs opacity-50 text-center">
+                  Cancelled {formatTime(sub.cancelled_at)}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function formatTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMs / 3600000);
+  const diffDay = Math.floor(diffMs / 86400000);
+  if (diffMin < 1) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return d.toLocaleDateString();
 }
