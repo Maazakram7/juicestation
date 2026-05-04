@@ -2,10 +2,9 @@ import { Router } from 'express';
 import { supabase } from '../lib/supabase.js';
 import { stripe } from '../lib/stripe.js';
 import { sendCustomerConfirmation, sendOwnerNotification } from '../lib/mailer.js';
+import { orderSchema, codOrderSchema, validate } from '../lib/validation.js';
 
 const router = Router();
-
-const MIN_ORDER_VALUE = 25;
 
 function generateOrderId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -18,8 +17,7 @@ function getClientBase() {
   return process.env.CLIENT_ORIGIN?.split(',')[0] || 'http://localhost:5173';
 }
 
-// Online payment via Stripe
-router.post('/', async (req, res) => {
+router.post('/', validate(orderSchema), async (req, res) => {
   try {
     const { customer, items, total } = req.body;
 
@@ -32,6 +30,7 @@ router.post('/', async (req, res) => {
     if (typeof total !== 'number' || total < 0) {
       return res.status(400).json({ error: 'Invalid total.' });
     }
+    const MIN_ORDER_VALUE = 25;
     if (total < MIN_ORDER_VALUE) {
       return res.status(400).json({ error: `Minimum order is £${MIN_ORDER_VALUE}.` });
     }
@@ -63,7 +62,6 @@ router.post('/', async (req, res) => {
         items,
         total,
         status: 'pending',
-        payment_method: 'online',
       })
       .select()
       .single();
@@ -113,9 +111,8 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: err.message || 'Server error.' });
   }
 });
-
-// Cash on delivery — same validation, no Stripe
-router.post('/cod', async (req, res) => {
+// Cash on delivery — same validation, no Stripe step
+router.post('/cod', validate(codOrderSchema), async (req, res) => {
   try {
     const { customer, items, total } = req.body;
 
@@ -128,6 +125,7 @@ router.post('/cod', async (req, res) => {
     if (typeof total !== 'number' || total < 0) {
       return res.status(400).json({ error: 'Invalid total.' });
     }
+    const MIN_ORDER_VALUE = 25;
     if (total < MIN_ORDER_VALUE) {
       return res.status(400).json({ error: `Minimum order is £${MIN_ORDER_VALUE}.` });
     }
@@ -166,7 +164,9 @@ router.post('/cod', async (req, res) => {
       return res.status(500).json({ error: 'Could not save order.' });
     }
 
+    // Fire emails immediately (no payment to wait for)
     if (order) {
+      // Add a flag so mailer can show COD notice
       order.is_cod = true;
       sendCustomerConfirmation(order).catch((err) =>
         console.error('[orders/cod] customer email failed:', err)
@@ -187,7 +187,6 @@ router.post('/cod', async (req, res) => {
     res.status(500).json({ error: err.message || 'Server error.' });
   }
 });
-
 router.get('/:id', async (req, res) => {
   const { data, error } = await supabase
     .from('orders')

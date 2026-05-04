@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { supabase } from '../lib/supabase.js';
 import { sendSubscriptionCustomerAck, sendSubscriptionOwnerNotification } from '../lib/mailer.js';
+import { subscriptionSchema, validate } from '../lib/validation.js';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ function generateSubscriptionId() {
   return id;
 }
 
-router.post('/', async (req, res) => {
+router.post('/', validate(subscriptionSchema), async (req, res) => {
   try {
     const { tier, customer } = req.body;
 
