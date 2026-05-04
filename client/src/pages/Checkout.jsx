@@ -10,6 +10,7 @@ export default function Checkout() {
   const { items, total, clear } = useCart();
   const navigate = useNavigate();
 
+  const [paymentMethod, setPaymentMethod] = useState('online');
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -20,8 +21,6 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // Warm up the backend on page load — Render free tier cold-starts
-  // after 15 mins of inactivity and can take 30-60s to wake up.
   useEffect(() => {
     fetch(`${API_URL}/`).catch(() => {});
   }, []);
@@ -35,8 +34,10 @@ export default function Checkout() {
     setSubmitting(true);
     setError(null);
 
+    const endpoint = paymentMethod === 'cod' ? `${API_URL}/order/cod` : `${API_URL}/order`;
+
     try {
-      const res = await fetch(`${API_URL}/order`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -54,16 +55,18 @@ export default function Checkout() {
 
       if (!res.ok) {
         const { error: msg } = await res.json().catch(() => ({}));
-        throw new Error(msg || 'Order failed — please try again.');
+        throw new Error(msg || 'Order failed.');
       }
       const data = await res.json();
 
-      if (!data.checkout_url) {
-        throw new Error('No payment URL returned.');
+      if (paymentMethod === 'online') {
+        if (!data.checkout_url) throw new Error('No payment URL.');
+        clear();
+        window.location.href = data.checkout_url;
+      } else {
+        clear();
+        navigate(`/order-success?id=${encodeURIComponent(data.order_id)}&type=cod`);
       }
-
-      clear();
-      window.location.href = data.checkout_url;
     } catch (err) {
       setError(err.message);
       setSubmitting(false);
@@ -74,12 +77,14 @@ export default function Checkout() {
     return (
       <div className="pt-40 pb-24 px-6 text-center max-w-xl mx-auto">
         <div className="text-6xl mb-6 opacity-30">🧃</div>
-        <h1 className="font-display text-4xl mb-4">Cart&apos;s empty.</h1>
-        <p className="opacity-60 mb-8">You&apos;ll want something in it before checking out.</p>
+        <h1 className="font-display text-4xl mb-4">Cart's empty.</h1>
+        <p className="opacity-60 mb-8">Add something before checking out.</p>
         <Link to="/menu" className="btn-primary">Browse the menu</Link>
       </div>
     );
   }
+
+  const belowMinimum = total < ONE_OFF_MIN_ORDER;
 
   return (
     <div className="pt-32 md:pt-40 pb-24">
@@ -91,9 +96,7 @@ export default function Checkout() {
           className="mb-12 max-w-2xl"
         >
           <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">Checkout</p>
-          <h1 className="font-display text-4xl md:text-6xl leading-[0.95]">
-            Almost there.
-          </h1>
+          <h1 className="font-display text-4xl md:text-6xl leading-[0.95]">Almost there.</h1>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -104,46 +107,31 @@ export default function Checkout() {
             <Field label="Delivery address" name="address" value={form.address} onChange={handleChange} required textarea />
             <Field label="Notes (optional)" name="notes" value={form.notes} onChange={handleChange} textarea />
 
-            {error && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-brand-melon"
-              >
-                {error}
-              </motion.p>
-            )}
+            <div className="pt-4">
+              <span className="text-xs uppercase tracking-[0.2em] opacity-50 mb-3 block">Payment method</span>
+              <div className="grid grid-cols-2 gap-3">
+                <PaymentOption active={paymentMethod === 'online'} onClick={() => setPaymentMethod('online')} title="Pay online" subtitle="Card, Apple Pay" />
+                <PaymentOption active={paymentMethod === 'cod'} onClick={() => setPaymentMethod('cod')} title="Cash on delivery" subtitle="Pay when delivered" />
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-brand-melon">{error}</p>}
 
             <button
               type="submit"
-              disabled={submitting || total < ONE_OFF_MIN_ORDER}
+              disabled={submitting || belowMinimum}
               className="btn-primary w-full mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {submitting ? (
-                <>
-                  <svg
-                    className="animate-spin w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  >
-                    <path d="M21 12a9 9 0 11-6.219-8.56" />
-                  </svg>
-                  Redirecting to Stripe…
-                </>
-              ) : (
-                <>
-                  {total < ONE_OFF_MIN_ORDER
-                    ? `Add £${(ONE_OFF_MIN_ORDER - total).toFixed(2)} more — £${ONE_OFF_MIN_ORDER} minimum`
-                    : `Pay £${total.toFixed(2)} securely`}
-                  <span>→</span>
-                </>
-              )}
+              {submitting
+                ? (paymentMethod === 'online' ? 'Redirecting...' : 'Placing order...')
+                : belowMinimum
+                ? `Add £${(ONE_OFF_MIN_ORDER - total).toFixed(2)} more — £${ONE_OFF_MIN_ORDER} minimum`
+                : paymentMethod === 'online'
+                ? `Pay £${total.toFixed(2)} securely →`
+                : `Place order — £${total.toFixed(2)} on delivery →`}
             </button>
             <p className="text-xs opacity-50 text-center mt-2">
-              Secure payment powered by Stripe.
+              {paymentMethod === 'online' ? 'Secure payment powered by Stripe.' : 'Pay the driver in cash on delivery.'}
             </p>
           </form>
 
@@ -158,13 +146,10 @@ export default function Checkout() {
                       {item.meta && <p className="text-xs opacity-50 truncate">{item.meta}</p>}
                     </div>
                     <span className="opacity-60 text-xs">× {item.qty}</span>
-                    <span className="tabular-nums w-16 text-right">
-                      £{(item.price * item.qty).toFixed(2)}
-                    </span>
+                    <span className="tabular-nums w-16 text-right">£{(item.price * item.qty).toFixed(2)}</span>
                   </li>
                 ))}
               </ul>
-
               <div className="pt-4 border-t border-black/10 flex items-baseline justify-between">
                 <span className="text-sm opacity-60">Total</span>
                 <span className="font-display text-2xl tabular-nums">£{total.toFixed(2)}</span>
@@ -174,7 +159,27 @@ export default function Checkout() {
         </div>
       </div>
     </div>
-  );f
+  );
+}
+
+function PaymentOption({ active, onClick, title, subtitle }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative text-left p-4 rounded-2xl border-2 transition-all ${active ? 'border-brand-green bg-brand-green/5' : 'border-black/10 hover:border-black/20'}`}
+    >
+      <p className="text-sm font-medium">{title}</p>
+      <p className="text-xs opacity-60 mt-0.5">{subtitle}</p>
+      {active && (
+        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-brand-green flex items-center justify-center">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+      )}
+    </button>
+  );
 }
 
 function Field({ label, name, value, onChange, type = 'text', textarea, required }) {
