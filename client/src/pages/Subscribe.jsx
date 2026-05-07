@@ -97,7 +97,7 @@ export default function Subscribe() {
             Every <em>Monday.</em>
           </h1>
           <p className="mt-8 text-lg opacity-70 max-w-2xl leading-relaxed">
-            Pressed Sunday night. Delivered first thing Monday morning. Free delivery across{' '}
+            Order by Sunday. Pressed Monday morning, delivered the same day. Free delivery across{' '}
             <strong>RG12, RG40, RG42</strong>. Pause, skip or cancel any week — no fees.
           </p>
         </motion.div>
