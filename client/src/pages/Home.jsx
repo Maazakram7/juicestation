@@ -39,7 +39,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xs md:text-sm uppercase tracking-[0.3em] opacity-60 mb-6"
+            className="text-xs md:text-sm uppercase tracking-[0.3em] text-subtle mb-6"
           >
             Bracknell · Berkshire · Since day one
           </motion.p>
@@ -82,7 +82,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1.3 }}
-            className="mt-10 md:mt-32 flex flex-wrap gap-4 md:gap-12 text-sm opacity-70"
+            className="mt-10 md:mt-32 flex flex-wrap gap-6 md:gap-12 text-sm"
           >
             {[
               ['No water', 'Ever.'],
@@ -90,9 +90,9 @@ export default function Home() {
               ['No additives', 'You read that right.'],
               ['Cold-pressed', 'Every morning.'],
             ].map(([label, sub]) => (
-              <div key={label}>
-                <p className="font-medium">{label}</p>
-                <p className="text-xs opacity-60 mt-0.5">{sub}</p>
+              <div key={label} className="border-l-2 border-brand-green pl-3">
+                <p className="font-semibold text-brand-charcoal">{label}</p>
+                <p className="text-xs text-subtle mt-0.5">{sub}</p>
               </div>
             ))}
           </motion.div>
@@ -112,11 +112,11 @@ export default function Home() {
               transition={{ duration: 0.7 }}
               className="max-w-xl"
             >
-              <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">The roster</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-faint mb-4">The roster</p>
               <h2 className="font-display text-3xl md:text-5xl lg:text-6xl leading-[0.95]">
                 Twenty Signature Juices.
                 <br />
-                <em className="not-italic text-brand-citrus">Zero shortcuts.</em>
+                <em className="not-italic text-brand-citrus-deep">Zero shortcuts.</em>
               </h2>
             </motion.div>
             <Link to="/menu" className="btn-ghost">

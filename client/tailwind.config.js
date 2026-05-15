@@ -5,16 +5,30 @@ export default {
     extend: {
       colors: {
         // Brand palette inspired by the JUICEeSTATION logo:
-        // green (watermelon/kale), watermelon red, citrus orange
+        // green (watermelon/kale), watermelon red, citrus orange.
+        //
+        // "*-deep" variants are darkened so they meet WCAG 2.1 AA
+        // contrast (>=4.5:1) when used as TEXT on the cream/white bg.
+        // Use the lighter values for fills, badges, and decoration.
         brand: {
-          green: '#7DC242',        // primary — from logo wordmark
-          'green-deep': '#5A9A2E', // darker green for hover/active
-          melon: '#E94E4E',        // watermelon red accent
-          citrus: '#F39324',       // orange accent
-          cream: '#FAF7F1',        // light bg
-          charcoal: '#111111',     // dark bg
-          ink: '#1B1B1B',          // dark card bg
+          green: '#7DC242',         // primary — logo wordmark / fills
+          'green-deep': '#4A8024',  // accessible green for text & hover
+          melon: '#E94E4E',         // watermelon red — fills/badges only
+          'melon-deep': '#C73A3A',  // accessible red for text/errors
+          citrus: '#F39324',        // citrus orange — fills/badges only
+          'citrus-deep': '#B36510', // accessible amber for text accents
+          cream: '#FAF7F1',         // light bg
+          charcoal: '#111111',      // dark bg
+          ink: '#1B1B1B',           // dark card bg
         },
+      },
+      // Codified z-index scale so overlays never fight.
+      zIndex: {
+        nav: '50',
+        toast: '60',
+        'drawer-bg': '70',
+        drawer: '80',
+        skip: '100',
       },
       fontFamily: {
         // Oryzo-inspired typography: PP Neue Montreal everywhere.

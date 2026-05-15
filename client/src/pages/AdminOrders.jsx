@@ -1,10 +1,142 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 const STORAGE_KEY = 'js_admin_token';
 
+/* ============================================================
+ * Notifications + Confirm dialog — replaces native alert/confirm
+ * so feedback stays inside the design system and isn't bypassed
+ * by iOS in-app browsers.
+ * ============================================================ */
+
+const NotifyContext = createContext(null);
+const useNotify = () => useContext(NotifyContext);
+
+function NotifyProvider({ children }) {
+  const [toasts, setToasts] = useState([]);
+  const [confirmState, setConfirmState] = useState(null);
+
+  const pushToast = (message, tone = 'info') => {
+    const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setToasts((prev) => [...prev, { id, message, tone }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
+  };
+
+  // Promise-returning confirm — drop-in replacement for window.confirm
+  const confirmAction = ({ title, body, confirmLabel = 'Confirm', tone = 'danger' }) =>
+    new Promise((resolve) => {
+      setConfirmState({ title, body, confirmLabel, tone, resolve });
+    });
+
+  const closeConfirm = (result) => {
+    confirmState?.resolve(result);
+    setConfirmState(null);
+  };
+
+  return (
+    <NotifyContext.Provider value={{
+      toast: {
+        info: (m) => pushToast(m, 'info'),
+        success: (m) => pushToast(m, 'success'),
+        error: (m) => pushToast(m, 'error'),
+      },
+      confirmAction,
+    }}>
+      {children}
+
+      {/* Toast stack */}
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-toast pointer-events-none flex flex-col items-center gap-2 px-4 w-full max-w-md">
+        <AnimatePresence>
+          {toasts.map((t) => (
+            <motion.div
+              key={t.id}
+              role="status"
+              initial={{ opacity: 0, y: -16, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
+              className={`pointer-events-auto w-full px-5 py-3 rounded-2xl shadow-2xl text-sm font-medium ${
+                t.tone === 'error'
+                  ? 'bg-brand-melon-deep text-white'
+                  : t.tone === 'success'
+                  ? 'bg-brand-green-deep text-white'
+                  : 'bg-brand-charcoal text-brand-cream'
+              }`}
+            >
+              {t.message}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Confirm dialog */}
+      <AnimatePresence>
+        {confirmState && (
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-drawer-bg bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => closeConfirm(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-brand-cream rounded-3xl max-w-md w-full p-7 shadow-2xl border border-black/[0.06]"
+            >
+              <h2 id="confirm-title" className="font-display text-2xl mb-2">
+                {confirmState.title}
+              </h2>
+              <p className="text-sm text-muted mb-7 leading-relaxed">
+                {confirmState.body}
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => closeConfirm(false)}
+                  className="px-5 py-3 rounded-full text-sm font-medium text-muted hover:text-brand-charcoal transition-colors"
+                  autoFocus
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => closeConfirm(true)}
+                  className={`px-5 py-3 rounded-full text-sm font-medium text-white transition-all ${
+                    confirmState.tone === 'danger'
+                      ? 'bg-brand-melon-deep hover:bg-brand-melon-deep/90'
+                      : 'bg-brand-green hover:bg-brand-green-deep'
+                  }`}
+                >
+                  {confirmState.confirmLabel}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </NotifyContext.Provider>
+  );
+}
+
 export default function AdminOrders() {
+  return (
+    <NotifyProvider>
+      <AdminOrdersInner />
+    </NotifyProvider>
+  );
+}
+
+function AdminOrdersInner() {
   const [token, setToken] = useState(() => sessionStorage.getItem(STORAGE_KEY) || '');
   const [authed, setAuthed] = useState(() => !!sessionStorage.getItem(STORAGE_KEY));
 
@@ -58,11 +190,24 @@ function LoginScreen({ onAuth }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-brand-cream px-6">
       <div className="max-w-sm w-full">
-        <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-3 text-center">Admin</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-faint mb-3 text-center">Admin</p>
         <h1 className="font-display text-3xl mb-8 text-center">Dashboard</h1>
         <form onSubmit={tryLogin} className="space-y-3">
+          {/* Hidden username helps password managers identify the credential */}
+          <input
+            type="text"
+            name="username"
+            autoComplete="username"
+            value="admin"
+            readOnly
+            aria-hidden="true"
+            className="sr-only"
+            tabIndex={-1}
+          />
           <input
             type="password"
+            name="password"
+            autoComplete="current-password"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="w-full px-5 py-3.5 rounded-2xl bg-white border border-black/10 focus:outline-none focus:border-brand-green transition-all"
@@ -74,7 +219,11 @@ function LoginScreen({ onAuth }) {
             {submitting ? 'Checking...' : 'Enter'}
           </button>
         </form>
-        {error && <p className="text-sm text-brand-melon mt-4 text-center">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm text-brand-melon-deep mt-4 text-center">
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -88,7 +237,7 @@ function Dashboard({ token, onLogout }) {
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] opacity-50">Admin</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-faint">Admin</p>
             <h1 className="font-display text-3xl md:text-4xl">Dashboard</h1>
           </div>
           <button
@@ -130,7 +279,7 @@ function TabButton({ active, onClick, children }) {
       className={`px-5 py-3 text-sm font-medium tracking-wide transition-all border-b-2 -mb-[2px] ${
         active
           ? 'border-brand-charcoal text-brand-charcoal'
-          : 'border-transparent opacity-50 hover:opacity-100'
+          : 'border-transparent text-muted hover:text-brand-charcoal'
       }`}
     >
       {children}
@@ -139,6 +288,7 @@ function TabButton({ active, onClick, children }) {
 }
 
 function OrdersTab({ token }) {
+  const { toast } = useNotify();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -178,9 +328,10 @@ function OrdersTab({ token }) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Could not update order');
       }
+      toast.success('Order marked as fulfilled');
       await fetchOrders();
     } catch (err) {
-      alert('Error: ' + err.message);
+      toast.error(err.message);
     }
   };
 
@@ -214,34 +365,35 @@ function OrdersTab({ token }) {
             key={f.id}
             type="button"
             onClick={() => setFilter(f.id)}
-            className={`px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
+            className={`min-h-[44px] px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
               filter === f.id
                 ? 'bg-brand-charcoal text-brand-cream'
-                : 'border border-current/15 hover:border-current/40 opacity-70 hover:opacity-100'
+                : 'border border-muted text-muted hover:text-brand-charcoal hover:border-black/40'
             }`}
+            aria-pressed={filter === f.id}
           >
             {f.label}
-            <span className="ml-2 text-xs opacity-60">{counts[f.id]}</span>
+            <span className="ml-2 text-xs opacity-80">{counts[f.id]}</span>
           </button>
         ))}
       </div>
 
       {lastFetch && (
-        <p className="text-xs opacity-40 mb-4">
+        <p className="text-xs text-subtle mb-4">
           Last updated: {lastFetch.toLocaleTimeString()} (auto-refreshes every 30s) — tap any order to expand
         </p>
       )}
 
       {error && (
-        <div className="mb-4 p-4 rounded-2xl bg-brand-melon/10 text-brand-melon text-sm">
+        <div role="alert" className="mb-4 p-4 rounded-2xl bg-brand-melon/10 text-brand-melon-deep text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-center py-20 opacity-50">Loading orders...</p>
+        <p className="text-center py-20 text-subtle">Loading orders...</p>
       ) : filtered.length === 0 ? (
-        <p className="text-center py-20 opacity-50">No orders {filter !== 'all' ? `with this status` : 'yet'}.</p>
+        <p className="text-center py-20 text-subtle">No orders {filter !== 'all' ? `with this status` : 'yet'}.</p>
       ) : (
         <div className="space-y-4">
           <AnimatePresence>
@@ -256,6 +408,7 @@ function OrdersTab({ token }) {
 }
 
 function SubscriptionsTab({ token }) {
+  const { toast, confirmAction } = useNotify();
   const [subs, setSubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -295,14 +448,21 @@ function SubscriptionsTab({ token }) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Could not activate');
       }
+      toast.success('Subscription activated');
       await fetchSubs();
     } catch (err) {
-      alert('Error: ' + err.message);
+      toast.error(err.message);
     }
   };
 
   const cancelSub = async (subscriptionId) => {
-    if (!confirm('Cancel this subscription? This cannot be undone.')) return;
+    const confirmed = await confirmAction({
+      title: 'Cancel this subscription?',
+      body: "This can't be undone. The customer will no longer receive deliveries and any active Stripe subscription should be cancelled separately.",
+      confirmLabel: 'Cancel subscription',
+      tone: 'danger',
+    });
+    if (!confirmed) return;
     try {
       const res = await fetch(`${API_URL}/admin/subscriptions/${subscriptionId}/cancel`, {
         method: 'PATCH',
@@ -312,9 +472,10 @@ function SubscriptionsTab({ token }) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Could not cancel');
       }
+      toast.success('Subscription cancelled');
       await fetchSubs();
     } catch (err) {
-      alert('Error: ' + err.message);
+      toast.error(err.message);
     }
   };
 
@@ -343,34 +504,35 @@ function SubscriptionsTab({ token }) {
             key={f.id}
             type="button"
             onClick={() => setFilter(f.id)}
-            className={`px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
+            className={`min-h-[44px] px-4 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
               filter === f.id
                 ? 'bg-brand-charcoal text-brand-cream'
-                : 'border border-current/15 hover:border-current/40 opacity-70 hover:opacity-100'
+                : 'border border-muted text-muted hover:text-brand-charcoal hover:border-black/40'
             }`}
+            aria-pressed={filter === f.id}
           >
             {f.label}
-            <span className="ml-2 text-xs opacity-60">{counts[f.id]}</span>
+            <span className="ml-2 text-xs opacity-80">{counts[f.id]}</span>
           </button>
         ))}
       </div>
 
       {lastFetch && (
-        <p className="text-xs opacity-40 mb-4">
+        <p className="text-xs text-subtle mb-4">
           Last updated: {lastFetch.toLocaleTimeString()} — tap any subscription to expand
         </p>
       )}
 
       {error && (
-        <div className="mb-4 p-4 rounded-2xl bg-brand-melon/10 text-brand-melon text-sm">
+        <div role="alert" className="mb-4 p-4 rounded-2xl bg-brand-melon/10 text-brand-melon-deep text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-center py-20 opacity-50">Loading subscriptions...</p>
+        <p className="text-center py-20 text-subtle">Loading subscriptions...</p>
       ) : filtered.length === 0 ? (
-        <p className="text-center py-20 opacity-50">No subscriptions {filter !== 'all' ? `with this status` : 'yet'}.</p>
+        <p className="text-center py-20 text-subtle">No subscriptions {filter !== 'all' ? `with this status` : 'yet'}.</p>
       ) : (
         <div className="space-y-4">
           <AnimatePresence>
@@ -397,7 +559,7 @@ function OrderCard({ order, onFulfill }) {
     pending_cod: 'bg-orange-100 text-orange-800',
     paid: 'bg-brand-green/15 text-brand-green-deep',
     fulfilled: 'bg-gray-200 text-gray-600',
-    cancelled: 'bg-brand-melon/15 text-brand-melon',
+    cancelled: 'bg-brand-melon/15 text-brand-melon-deep',
   };
 
   const statusLabels = {
@@ -418,12 +580,11 @@ function OrderCard({ order, onFulfill }) {
       exit={{ opacity: 0, y: -10 }}
       className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden"
     >
-      <div
+      <button
+        type="button"
         onClick={() => setExpanded(!expanded)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(!expanded); }}
-        className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors cursor-pointer"
+        aria-expanded={expanded}
+        className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -432,20 +593,20 @@ function OrderCard({ order, onFulfill }) {
                 {statusLabels[order.status] || order.status}
               </span>
               <span className="font-display text-base font-semibold tabular-nums">#{String(order.sequence_number || 0).padStart(5, '0')}</span>
-              <span className="font-mono text-xs opacity-50">{order.order_id}</span>
-              <span className="text-xs opacity-50">{formatTime(order.created_at)}</span>
+              <span className="font-mono text-xs text-subtle">{order.order_id}</span>
+              <span className="text-xs text-subtle">{formatTime(order.created_at)}</span>
             </div>
             <p className="font-medium text-sm md:text-base truncate">{order.customer_name}</p>
-            <p className="text-xs opacity-60 truncate">{order.items.reduce((s, i) => s + i.qty, 0)} items · tap to expand</p>
+            <p className="text-xs text-muted truncate">{order.items.reduce((s, i) => s + i.qty, 0)} items · tap to expand</p>
           </div>
           <div className="text-right flex-shrink-0">
             <p className="font-display text-xl md:text-2xl tabular-nums">£{Number(order.total).toFixed(2)}</p>
             {order.status === 'pending_cod' && (
-              <p className="text-[10px] uppercase tracking-wider text-orange-700 font-medium mt-1">Collect cash</p>
+              <p className="text-[10px] uppercase tracking-wider text-orange-800 font-medium mt-1">Collect cash</p>
             )}
           </div>
         </div>
-      </div>
+      </button>
 
       <AnimatePresence>
         {expanded && (
@@ -458,15 +619,15 @@ function OrderCard({ order, onFulfill }) {
           >
             <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-black/[0.06] pt-4 space-y-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Contact</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Contact</p>
                 <p className="text-sm">
-                  <a href={`mailto:${order.customer_email}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
+                  <a href={`mailto:${order.customer_email}`} className="text-brand-green-deep underline">
                     {order.customer_email}
                   </a>
                 </p>
                 {order.customer_phone && (
                   <p className="text-sm">
-                    <a href={`tel:${order.customer_phone}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
+                    <a href={`tel:${order.customer_phone}`} className="text-brand-green-deep underline">
                       {order.customer_phone}
                     </a>
                   </p>
@@ -474,40 +635,36 @@ function OrderCard({ order, onFulfill }) {
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Items</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Items</p>
                 <ul className="space-y-1">
                   {order.items.map((item, i) => (
                     <li key={i} className="text-sm flex justify-between">
                       <span>
                         {item.name}
-                        {item.meta && <span className="opacity-50 text-xs"> ({item.meta})</span>}
+                        {item.meta && <span className="text-subtle text-xs"> ({item.meta})</span>}
                       </span>
-                      <span className="opacity-60 tabular-nums">x{item.qty} · £{(item.price * item.qty).toFixed(2)}</span>
+                      <span className="text-muted tabular-nums">x{item.qty} · £{(item.price * item.qty).toFixed(2)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Delivery to</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Delivery to</p>
                 <p className="text-sm whitespace-pre-line">{order.delivery_address}</p>
               </div>
 
               {order.notes && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Notes</p>
-                  <p className="text-sm italic opacity-80">"{order.notes}"</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Notes</p>
+                  <p className="text-sm italic text-muted">"{order.notes}"</p>
                 </div>
               )}
 
               {canFulfill && (
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onFulfill(order.order_id);
-                  }}
+                  onClick={() => onFulfill(order.order_id)}
                   className="btn-primary w-full text-sm"
                 >
                   {order.status === 'pending_cod' ? 'Mark delivered & cash collected' : 'Mark as fulfilled'}
@@ -515,13 +672,13 @@ function OrderCard({ order, onFulfill }) {
               )}
 
               {order.status === 'pending' && (
-                <p className="text-xs text-center opacity-60 italic">
+                <p className="text-xs text-center text-muted italic">
                   Awaiting Stripe payment confirmation.
                 </p>
               )}
 
               {order.status === 'fulfilled' && order.fulfilled_at && (
-                <p className="text-xs opacity-50 text-center">
+                <p className="text-xs text-subtle text-center">
                   Fulfilled {formatTime(order.fulfilled_at)}
                 </p>
               )}
@@ -558,12 +715,11 @@ function SubscriptionCard({ sub, onActivate, onCancel }) {
       exit={{ opacity: 0, y: -10 }}
       className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden"
     >
-      <div
+      <button
+        type="button"
         onClick={() => setExpanded(!expanded)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(!expanded); }}
-        className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors cursor-pointer"
+        aria-expanded={expanded}
+        className="w-full text-left p-4 md:p-5 hover:bg-black/[0.02] transition-colors"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -571,18 +727,18 @@ function SubscriptionCard({ sub, onActivate, onCancel }) {
               <span className={`text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full ${statusColors[sub.status] || 'bg-gray-100'}`}>
                 {statusLabels[sub.status] || sub.status}
               </span>
-              <span className="font-mono text-xs opacity-50">{sub.subscription_id}</span>
-              <span className="text-xs opacity-50">{formatTime(sub.created_at)}</span>
+              <span className="font-mono text-xs text-subtle">{sub.subscription_id}</span>
+              <span className="text-xs text-subtle">{formatTime(sub.created_at)}</span>
             </div>
             <p className="font-medium text-sm md:text-base truncate">{sub.customer_name}</p>
-            <p className="text-xs opacity-60 truncate">{sub.tier_name} · tap to expand</p>
+            <p className="text-xs text-muted truncate">{sub.tier_name} · tap to expand</p>
           </div>
           <div className="text-right flex-shrink-0">
             <p className="font-display text-xl md:text-2xl tabular-nums">£{Number(sub.price_per_week).toFixed(2)}</p>
-            <p className="text-[10px] uppercase tracking-wider opacity-50 mt-1">per week</p>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-faint mt-1">per week</p>
           </div>
         </div>
-      </div>
+      </button>
 
       <AnimatePresence>
         {expanded && (
@@ -595,15 +751,15 @@ function SubscriptionCard({ sub, onActivate, onCancel }) {
           >
             <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-black/[0.06] pt-4 space-y-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Contact</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Contact</p>
                 <p className="text-sm">
-                  <a href={`mailto:${sub.customer_email}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
+                  <a href={`mailto:${sub.customer_email}`} className="text-brand-green-deep underline">
                     {sub.customer_email}
                   </a>
                 </p>
                 {sub.customer_phone && (
                   <p className="text-sm">
-                    <a href={`tel:${sub.customer_phone}`} onClick={(e) => e.stopPropagation()} className="text-brand-green-deep">
+                    <a href={`tel:${sub.customer_phone}`} className="text-brand-green-deep underline">
                       {sub.customer_phone}
                     </a>
                   </p>
@@ -611,39 +767,39 @@ function SubscriptionCard({ sub, onActivate, onCancel }) {
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Plan</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Plan</p>
                 <p className="text-sm font-medium">{sub.tier_name}</p>
-                <p className="text-sm opacity-60">£{Number(sub.price_per_week).toFixed(2)} per week</p>
+                <p className="text-sm text-muted">£{Number(sub.price_per_week).toFixed(2)} per week</p>
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Postcode</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Postcode</p>
                 <p className="text-sm">{sub.delivery_postcode}</p>
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Delivery to</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Delivery to</p>
                 <p className="text-sm whitespace-pre-line">{sub.delivery_address}</p>
               </div>
 
               {sub.juice_preference && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Juice preference</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Juice preference</p>
                   <p className="text-sm">{sub.juice_preference}</p>
                 </div>
               )}
 
               {sub.preferred_start_date && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Preferred start date</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Preferred start date</p>
                   <p className="text-sm">{sub.preferred_start_date}</p>
                 </div>
               )}
 
               {sub.notes && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-1">Notes</p>
-                  <p className="text-sm italic opacity-80">"{sub.notes}"</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-1">Notes</p>
+                  <p className="text-sm italic text-muted">"{sub.notes}"</p>
                 </div>
               )}
 
@@ -651,23 +807,15 @@ function SubscriptionCard({ sub, onActivate, onCancel }) {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onActivate(sub.subscription_id);
-                    }}
+                    onClick={() => onActivate(sub.subscription_id)}
                     className="btn-primary flex-1 text-sm"
                   >
                     Mark as active
                   </button>
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onCancel(sub.subscription_id);
-                    }}
-                    className="px-5 py-3 rounded-full border-2 border-brand-melon text-brand-melon hover:bg-brand-melon hover:text-white transition-colors text-sm font-medium"
+                    onClick={() => onCancel(sub.subscription_id)}
+                    className="px-5 py-3 rounded-full border-2 border-brand-melon-deep text-brand-melon-deep hover:bg-brand-melon-deep hover:text-white transition-colors text-sm font-medium"
                   >
                     Cancel
                   </button>
@@ -677,25 +825,21 @@ function SubscriptionCard({ sub, onActivate, onCancel }) {
               {sub.status === 'active' && (
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onCancel(sub.subscription_id);
-                  }}
-                  className="w-full px-5 py-3 rounded-full border-2 border-brand-melon text-brand-melon hover:bg-brand-melon hover:text-white transition-colors text-sm font-medium"
+                  onClick={() => onCancel(sub.subscription_id)}
+                  className="w-full px-5 py-3 rounded-full border-2 border-brand-melon-deep text-brand-melon-deep hover:bg-brand-melon-deep hover:text-white transition-colors text-sm font-medium"
                 >
                   Cancel subscription
                 </button>
               )}
 
               {sub.status === 'active' && sub.activated_at && (
-                <p className="text-xs opacity-50 text-center">
+                <p className="text-xs text-subtle text-center">
                   Active since {formatTime(sub.activated_at)}
                 </p>
               )}
 
               {sub.status === 'cancelled' && sub.cancelled_at && (
-                <p className="text-xs opacity-50 text-center">
+                <p className="text-xs text-subtle text-center">
                   Cancelled {formatTime(sub.cancelled_at)}
                 </p>
               )}

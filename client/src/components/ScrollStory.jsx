@@ -61,7 +61,7 @@ function MobileScrollStory() {
       aria-label="Fresh ingredients, cold-pressed"
     >
       <div className="relative h-[70vh] w-full flex items-center justify-center">
-       <div className="absolute top-6 left-0 right-0 z-30 flex justify-between items-center px-5 text-[9px] uppercase tracking-[0.3em] opacity-50">
+       <div className="absolute top-6 left-0 right-0 z-30 flex justify-between items-center px-5 text-[9px] uppercase tracking-[0.3em] text-faint">
           <span>The Process</span>
         </div>
 
@@ -168,7 +168,7 @@ function DesktopScrollStory() {
         className="relative h-screen w-full overflow-hidden flex items-center justify-center"
         style={{ transform: 'translateZ(0)' }}
       >
-        <div className="absolute top-10 left-0 right-0 z-30 flex justify-between items-center px-10 text-xs uppercase tracking-[0.3em] opacity-50">
+        <div className="absolute top-10 left-0 right-0 z-30 flex justify-between items-center px-10 text-xs uppercase tracking-[0.3em] text-faint">
           <span>The Process</span>
           <span className="font-mono">Fresh &middot; Raw &middot; Cold-pressed</span>
         </div>

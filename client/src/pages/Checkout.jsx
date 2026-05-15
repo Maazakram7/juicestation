@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { ONE_OFF_MIN_ORDER } from '../data/subscriptions';
@@ -20,10 +20,6 @@ export default function Checkout() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch(`${API_URL}/`).catch(() => {});
-  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -76,9 +72,9 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="pt-40 pb-24 px-6 text-center max-w-xl mx-auto">
-        <div className="text-6xl mb-6 opacity-30">🧃</div>
+        <div className="text-6xl mb-6 opacity-30" aria-hidden="true">🧃</div>
         <h1 className="font-display text-4xl mb-4">Cart's empty.</h1>
-        <p className="opacity-60 mb-8">Add something before checking out.</p>
+        <p className="text-muted mb-8">Add something before checking out.</p>
         <Link to="/menu" className="btn-primary">Browse the menu</Link>
       </div>
     );
@@ -95,27 +91,31 @@ export default function Checkout() {
           transition={{ duration: 0.7 }}
           className="mb-12 max-w-2xl"
         >
-          <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">Checkout</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Checkout</p>
           <h1 className="font-display text-4xl md:text-6xl leading-[0.95]">Almost there.</h1>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-4">
-            <Field label="Name" name="name" value={form.name} onChange={handleChange} required />
-            <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} required />
-            <Field label="Phone" name="phone" type="tel" value={form.phone} onChange={handleChange} required />
-            <Field label="Delivery address" name="address" value={form.address} onChange={handleChange} required textarea />
-            <Field label="Notes (optional)" name="notes" value={form.notes} onChange={handleChange} textarea />
+            <Field label="Name" name="name" value={form.name} onChange={handleChange} required autoComplete="name" />
+            <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} required autoComplete="email" />
+            <Field label="Phone" name="phone" type="tel" value={form.phone} onChange={handleChange} required autoComplete="tel" />
+            <Field label="Delivery address" name="address" value={form.address} onChange={handleChange} required textarea autoComplete="street-address" />
+            <Field label="Notes (optional)" name="notes" value={form.notes} onChange={handleChange} textarea autoComplete="off" />
 
             <div className="pt-4">
-              <span className="text-xs uppercase tracking-[0.2em] opacity-50 mb-3 block">Payment method</span>
+              <span className="text-xs uppercase tracking-[0.3em] text-faint mb-3 block">Payment method</span>
               <div className="grid grid-cols-2 gap-3">
                 <PaymentOption active={paymentMethod === 'online'} onClick={() => setPaymentMethod('online')} title="Pay online" subtitle="Card, Apple Pay" />
                 <PaymentOption active={paymentMethod === 'cod'} onClick={() => setPaymentMethod('cod')} title="Cash on delivery" subtitle="Pay when delivered" />
               </div>
             </div>
 
-            {error && <p className="text-sm text-brand-melon">{error}</p>}
+            {error && (
+              <p role="alert" className="text-sm text-brand-melon-deep">
+                {error}
+              </p>
+            )}
 
             <button
               type="submit"
@@ -130,7 +130,7 @@ export default function Checkout() {
                 ? `Pay £${total.toFixed(2)} securely →`
                 : `Place order — £${total.toFixed(2)} on delivery →`}
             </button>
-            <p className="text-xs opacity-50 text-center mt-2">
+            <p className="text-xs text-subtle text-center mt-2">
               {paymentMethod === 'online' ? 'Secure payment powered by Stripe.' : 'Pay the driver in cash on delivery.'}
             </p>
           </form>
@@ -143,15 +143,15 @@ export default function Checkout() {
                   <li key={item.id} className="flex items-center justify-between text-sm">
                     <div className="min-w-0 flex-1 mr-4">
                       <p className="truncate">{item.name}</p>
-                      {item.meta && <p className="text-xs opacity-50 truncate">{item.meta}</p>}
+                      {item.meta && <p className="text-xs text-subtle truncate">{item.meta}</p>}
                     </div>
-                    <span className="opacity-60 text-xs">× {item.qty}</span>
+                    <span className="text-subtle text-xs">× {item.qty}</span>
                     <span className="tabular-nums w-16 text-right">£{(item.price * item.qty).toFixed(2)}</span>
                   </li>
                 ))}
               </ul>
               <div className="pt-4 border-t border-black/10 flex items-baseline justify-between">
-                <span className="text-sm opacity-60">Total</span>
+                <span className="text-sm text-muted">Total</span>
                 <span className="font-display text-2xl tabular-nums">£{total.toFixed(2)}</span>
               </div>
             </div>
@@ -167,12 +167,13 @@ function PaymentOption({ active, onClick, title, subtitle }) {
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={`relative text-left p-4 rounded-2xl border-2 transition-all ${active ? 'border-brand-green bg-brand-green/5' : 'border-black/10 hover:border-black/20'}`}
     >
       <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs opacity-60 mt-0.5">{subtitle}</p>
+      <p className="text-xs text-muted mt-0.5">{subtitle}</p>
       {active && (
-        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-brand-green flex items-center justify-center">
+        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-brand-green flex items-center justify-center" aria-hidden="true">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
@@ -182,11 +183,15 @@ function PaymentOption({ active, onClick, title, subtitle }) {
   );
 }
 
-function Field({ label, name, value, onChange, type = 'text', textarea, required }) {
+/**
+ * Form field with optional hint copy below the input.
+ * `hintTone` controls colour: 'error' = red, 'ok' = green, 'muted' (default).
+ */
+function Field({ label, name, value, onChange, type = 'text', textarea, required, hint, hintTone = 'muted', autoComplete }) {
   const Tag = textarea ? 'textarea' : 'input';
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-[0.2em] opacity-50 mb-2 block">{label}</span>
+      <span className="text-xs uppercase tracking-[0.3em] text-faint mb-2 block">{label}</span>
       <Tag
         name={name}
         type={type}
@@ -194,8 +199,22 @@ function Field({ label, name, value, onChange, type = 'text', textarea, required
         onChange={onChange}
         required={required}
         rows={textarea ? 3 : undefined}
+        autoComplete={autoComplete}
         className="w-full px-5 py-3.5 rounded-2xl bg-white border border-black/[0.08] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 transition-all font-sans"
       />
+      {hint && (
+        <p
+          className={`text-xs mt-2 ${
+            hintTone === 'error'
+              ? 'text-brand-melon-deep'
+              : hintTone === 'ok'
+              ? 'text-brand-green-deep'
+              : 'text-subtle'
+          }`}
+        >
+          {hint}
+        </p>
+      )}
     </label>
   );
 }

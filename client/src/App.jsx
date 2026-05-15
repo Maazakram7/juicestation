@@ -34,10 +34,13 @@ export default function App() {
   return (
     
       <>
+        {/* Visible only when focused. Helps keyboard users skip past the
+            navbar + cart icon on every page (WCAG 2.4.1). */}
+        <a href="#main" className="skip-link">Skip to main content</a>
         <ScrollToTop />
         <Navbar />
         <CartDrawer />
-        <main className="min-h-screen">
+        <main id="main" className="min-h-screen">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={<PageTransition><Home /></PageTransition>} />

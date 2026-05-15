@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   SUBSCRIPTION_TIERS,
@@ -14,6 +14,16 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 export default function Subscribe() {
   const navigate = useNavigate();
   const [selectedTier, setSelectedTier] = useState(null);
+  const formRef = useRef(null);
+
+  // Scroll the form into view once it has mounted under AnimatePresence.
+  // Effect runs after layout, so the target always exists — no setTimeout.
+  useEffect(() => {
+    if (selectedTier && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [selectedTier]);
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -90,13 +100,13 @@ export default function Subscribe() {
           transition={{ duration: 0.7 }}
           className="mb-16 md:mb-20 max-w-4xl"
         >
-          <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">Weekly subscription</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Weekly subscription</p>
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
             Delivered fresh.
             <br />
             Every <em>Monday.</em>
           </h1>
-          <p className="mt-8 text-lg opacity-70 max-w-2xl leading-relaxed">
+          <p className="mt-8 text-lg text-muted max-w-2xl leading-relaxed">
             Order by Sunday. Pressed Monday morning, delivered the same day. Free delivery across{' '}
             <strong>RG12, RG40, RG42</strong>. Pause, skip or cancel any week — no fees.
           </p>
@@ -112,7 +122,7 @@ export default function Subscribe() {
           {SUBSCRIPTION_BENEFITS.map((b) => (
             <div key={b.label}>
               <p className="font-display text-lg mb-1.5">{b.label}</p>
-              <p className="text-sm opacity-60 leading-relaxed">{b.body}</p>
+              <p className="text-sm text-muted leading-relaxed">{b.body}</p>
             </div>
           ))}
         </motion.div>
@@ -120,7 +130,7 @@ export default function Subscribe() {
         {/* Tiers */}
         <div className="mb-16">
           <div className="mb-10">
-            <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-3">Pick a plan</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-faint mb-3">Pick a plan</p>
             <h2 className="font-display text-3xl md:text-5xl tracking-tight">
               Three tiers. Switch anytime.
             </h2>
@@ -133,13 +143,7 @@ export default function Subscribe() {
                 tier={tier}
                 index={i}
                 selected={selectedTier === tier.id}
-                onSelect={() => {
-                  setSelectedTier(tier.id);
-                  // Smooth scroll to the form
-                  setTimeout(() => {
-                    document.getElementById('subscribe-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 100);
-                }}
+                onSelect={() => setSelectedTier(tier.id)}
               />
             ))}
           </div>
@@ -150,6 +154,7 @@ export default function Subscribe() {
           {selectedTier && (
             <motion.section
               id="subscribe-form"
+              ref={formRef}
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
@@ -160,14 +165,14 @@ export default function Subscribe() {
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-4">
                   <div className="mb-6">
-                    <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-2">Your details</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-faint mb-2">Your details</p>
                     <h3 className="font-display text-2xl md:text-3xl tracking-tight">
                       Let's get you set up.
                     </h3>
                   </div>
-                  <Field label="Name" name="name" value={form.name} onChange={handleChange} required />
-                  <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} required />
-                  <Field label="Phone" name="phone" type="tel" value={form.phone} onChange={handleChange} required />
+                  <Field label="Name" name="name" value={form.name} onChange={handleChange} required autoComplete="name" />
+                  <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} required autoComplete="email" />
+                  <Field label="Phone" name="phone" type="tel" value={form.phone} onChange={handleChange} required autoComplete="tel" />
                   <Field
                     label="Delivery postcode"
                     name="postcode"
@@ -184,8 +189,9 @@ export default function Subscribe() {
                         : 'Covers RG12 · RG40 · RG42 first, extended zones available'
                     }
                     hintTone={postcodeStatus === 'out-of-range' ? 'error' : postcodeStatus ? 'ok' : 'muted'}
+                    autoComplete="postal-code"
                   />
-                  <Field label="Full delivery address" name="address" value={form.address} onChange={handleChange} required textarea />
+                  <Field label="Full delivery address" name="address" value={form.address} onChange={handleChange} required textarea autoComplete="street-address" />
                   <Field
                     label="Preferred juices (optional)"
                     name="juicePreference"
@@ -204,7 +210,12 @@ export default function Subscribe() {
                   <Field label="Anything else we should know?" name="notes" value={form.notes} onChange={handleChange} textarea />
 
                   {error && (
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-brand-melon">
+                    <motion.p
+                      role="alert"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-sm text-brand-melon-deep"
+                    >
                       {error}
                     </motion.p>
                   )}
@@ -218,7 +229,7 @@ export default function Subscribe() {
                       {submitting ? 'Submitting…' : `Subscribe · £${tier?.pricePerWeek}/week`}
                       {!submitting && <span>→</span>}
                     </button>
-                    <p className="text-xs opacity-50 mt-4 max-w-lg">
+                    <p className="text-xs text-subtle mt-4 max-w-lg">
                       We'll confirm by email within 24 hours and set up your billing. First delivery on the Monday after confirmation. Cancel any time.
                     </p>
                   </div>
@@ -227,9 +238,9 @@ export default function Subscribe() {
                 {/* Sticky summary */}
                 <aside className="lg:col-span-5">
                   <div className="lg:sticky lg:top-28 rounded-[28px] bg-white border border-black/[0.06] p-6 md:p-8">
-                    <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-3">Your plan</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-faint mb-3">Your plan</p>
                     <h3 className="font-display text-2xl mb-1">{tier.name}</h3>
-                    <p className="text-sm opacity-60 italic mb-6">{tier.tagline}</p>
+                    <p className="text-sm text-muted italic mb-6">{tier.tagline}</p>
 
                     <ul className="space-y-3 mb-6">
                       {tier.contents.map((c, i) => (
@@ -238,26 +249,26 @@ export default function Subscribe() {
                             <p>
                               <span className="tabular-nums">{c.qty}×</span> {c.label}
                             </p>
-                            <p className="text-xs opacity-50 mt-0.5">{c.note}</p>
+                            <p className="text-xs text-subtle mt-0.5">{c.note}</p>
                           </div>
                         </li>
                       ))}
                     </ul>
 
                     <div className="pt-4 border-t border-current/10 space-y-2">
-                      <div className="flex justify-between text-sm opacity-60">
+                      <div className="flex justify-between text-sm text-muted">
                         <span>Walk-up value</span>
                         <span className="line-through tabular-nums">£{tier.walkUpValue.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="opacity-60">Delivery</span>
+                        <span className="text-muted">Delivery</span>
                         <span className="text-brand-green-deep font-medium">Free</span>
                       </div>
                       <div className="flex items-baseline justify-between pt-3 border-t border-current/10">
                         <span className="font-medium">Your weekly total</span>
                         <span className="font-display text-2xl tabular-nums">£{tier.pricePerWeek}</span>
                       </div>
-                      <p className="text-xs opacity-50 text-right">
+                      <p className="text-xs text-subtle text-right">
                         Save £{tier.savings.toFixed(2)}/week · £{(tier.savings * 52).toFixed(0)}/year
                       </p>
                     </div>
@@ -278,11 +289,11 @@ export default function Subscribe() {
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="max-w-lg">
-              <p className="text-xs uppercase tracking-[0.3em] opacity-60 mb-3">Not ready to subscribe?</p>
+              <p className="text-xs uppercase tracking-[0.3em] opacity-70 mb-3">Not ready to subscribe?</p>
               <h3 className="font-display text-2xl md:text-3xl tracking-tight mb-3">
                 One-off delivery, £{ONE_OFF_MIN_ORDER} minimum.
               </h3>
-              <p className="opacity-70 leading-relaxed">
+              <p className="opacity-80 leading-relaxed">
                 Build an order of £{ONE_OFF_MIN_ORDER} or more and we'll deliver it to your door for £{ONE_OFF_DELIVERY_FEE.toFixed(2)}. Subscribers skip this fee every week.
               </p>
             </div>
@@ -330,15 +341,15 @@ function TierCard({ tier, selected, onSelect, index }) {
         </span>
       )}
 
-      <p className="text-xs uppercase tracking-[0.2em] opacity-50 mb-3">{tier.tagline}</p>
+      <p className={`text-xs uppercase tracking-[0.3em] mb-3 ${selected ? 'opacity-70' : 'text-faint'}`}>{tier.tagline}</p>
       <h3 className="font-display text-2xl md:text-3xl tracking-tight mb-4 leading-none">{tier.name}</h3>
 
       <div className="mb-6">
         <div className="flex items-baseline gap-2">
           <span className="font-display text-4xl tabular-nums">£{tier.pricePerWeek}</span>
-          <span className="text-sm opacity-60">/week</span>
+          <span className={`text-sm ${selected ? 'opacity-70' : 'text-muted'}`}>/week</span>
         </div>
-        <p className="text-xs opacity-50 mt-1 tabular-nums">
+        <p className={`text-xs mt-1 tabular-nums ${selected ? 'opacity-70' : 'text-subtle'}`}>
           Save £{tier.savings.toFixed(2)}/week vs walk-up
         </p>
       </div>
@@ -352,19 +363,19 @@ function TierCard({ tier, selected, onSelect, index }) {
         ))}
       </div>
 
-      <p className="text-sm opacity-60 leading-relaxed mb-4">{tier.description}</p>
-      <p className="text-xs opacity-50 italic pt-3 border-t border-current/10">
+      <p className={`text-sm leading-relaxed mb-4 ${selected ? 'opacity-80' : 'text-muted'}`}>{tier.description}</p>
+      <p className={`text-xs italic pt-3 border-t border-current/10 ${selected ? 'opacity-70' : 'text-subtle'}`}>
         Best for: {tier.bestFor}
       </p>
     </motion.button>
   );
 }
 
-function Field({ label, name, value, onChange, type = 'text', textarea, required, hint, hintTone = 'muted', placeholder }) {
+function Field({ label, name, value, onChange, type = 'text', textarea, required, hint, hintTone = 'muted', placeholder, autoComplete }) {
   const Tag = textarea ? 'textarea' : 'input';
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-[0.2em] opacity-50 mb-2 block">{label}</span>
+      <span className="text-xs uppercase tracking-[0.3em] text-faint mb-2 block">{label}</span>
       <Tag
         name={name}
         type={type}
@@ -373,16 +384,17 @@ function Field({ label, name, value, onChange, type = 'text', textarea, required
         required={required}
         rows={textarea ? 2 : undefined}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         className="w-full px-5 py-3.5 rounded-2xl bg-white border border-black/[0.08] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 transition-all font-sans"
       />
       {hint && (
         <p
           className={`text-xs mt-2 ${
             hintTone === 'error'
-              ? 'text-brand-melon'
+              ? 'text-brand-melon-deep'
               : hintTone === 'ok'
               ? 'text-brand-green-deep'
-              : 'opacity-50'
+              : 'text-subtle'
           }`}
         >
           {hint}

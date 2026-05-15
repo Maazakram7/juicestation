@@ -23,12 +23,103 @@
 
   em {
     @apply not-italic relative inline-block;
-    color: #5A9A2E;
+    color: #4A8024; /* brand-green-deep — AA-compliant on cream/white */
   }
 
   ::selection {
     @apply bg-brand-green text-white;
   }
+}
+
+@layer utilities {
+  /*
+   * Three-step de-emphasis scale.
+   * Backed by explicit colours (rgb) rather than opacity so contrast
+   * is measurable and meets WCAG 2.1 AA on the cream / white surfaces.
+   *
+   *  text-muted   ≈ 7.0:1  on #FAF7F1   — secondary copy
+   *  text-subtle  ≈ 4.7:1  on #FAF7F1   — captions, hints
+   *  text-faint   ≈ 3.2:1  on #FAF7F1   — eyebrows, labels (used only
+   *                                       on UPPERCASE >=12px tracking)
+   */
+  .text-muted  { color: #4A4A4A; }
+  .text-subtle { color: #6B6B6B; }
+  .text-faint  { color: #7F7F7F; }
+
+  /* Hairline borders — replace ad-hoc black/5, black/[0.06], current/15 */
+  .border-hairline { border-color: rgb(0 0 0 / 0.06); }
+  .border-muted    { border-color: rgb(0 0 0 / 0.15); }
+}
+
+/* Skip-to-content link (visible only when focused, top-left, above all) */
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: #111111;
+  color: #FAF7F1;
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  transform: translateY(-200%);
+  transition: transform 0.25s ease-out;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid #7DC242;
+  outline-offset: 2px;
+}
+
+/* ---- Shared keyframes (was inline <style> in Builder/Testimonials) ---- */
+:root { --edge-fade: #FAF7F1; }
+.dark { --edge-fade: #1B1B1B; }
+
+@keyframes marquee-forward {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.animate-marquee-forward { animation: marquee-forward linear infinite; }
+.animate-marquee-reverse { animation: marquee-reverse linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-forward,
+  .animate-marquee-reverse { animation: none; }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes toastPop {
+  0%   { transform: translateY(-20px) scale(0.85); opacity: 0; }
+  50%  { transform: translateY(2px) scale(1.03); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes toastFade {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-8px) scale(0.92); }
+}
+.js-toast {
+  animation: toastPop 0.32s cubic-bezier(0.2, 0.8, 0.2, 1.2) forwards,
+             toastFade 0.25s ease-out 1.7s forwards;
+  will-change: transform, opacity;
+}
+
+/* Line-clamp utility (Tailwind v3 has it, but kept here for safety) */
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @layer components {

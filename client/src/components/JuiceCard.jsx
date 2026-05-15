@@ -103,12 +103,12 @@ export default function JuiceCard({ juice, index = 0 }) {
             />
           </h3>
 
-          <p className="text-[11px] sm:text-[13px] md:text-sm opacity-60 mb-3 md:mb-6 min-h-[16px] md:min-h-[20px]">
+          <p className="text-[11px] sm:text-[13px] md:text-sm text-muted mb-3 md:mb-6 min-h-[16px] md:min-h-[20px]">
             {juice.tagline || '\u00A0'}
           </p>
 
           <p
-            className="text-[10px] sm:text-[12px] md:text-[13px] leading-relaxed opacity-75 mb-3 md:mb-6 border-l-2 pl-2 sm:pl-3 md:pl-4 py-0.5 md:py-1 min-h-[36px] sm:min-h-[42px] md:min-h-[48px]"
+            className="text-[10px] sm:text-[12px] md:text-[13px] leading-relaxed text-muted mb-3 md:mb-6 border-l-2 pl-2 sm:pl-3 md:pl-4 py-0.5 md:py-1 min-h-[36px] sm:min-h-[42px] md:min-h-[48px]"
             style={{ borderColor: juice.accent }}
           >
             {juice.ingredients.join(' · ')}
@@ -125,10 +125,11 @@ export default function JuiceCard({ juice, index = 0 }) {
                 <button
                   key={s}
                   onClick={() => setSize(s)}
-                  className={`text-[10px] sm:text-[11px] md:text-xs tracking-wider px-2 sm:px-2.5 md:px-3 py-1 md:py-1.5 rounded-full transition-all tabular-nums ${
+                  aria-pressed={size === s}
+                  className={`text-[10px] sm:text-[11px] md:text-xs tracking-wider px-3 sm:px-3 md:px-3 py-1.5 md:py-1.5 rounded-full transition-all tabular-nums ${
                     size === s
                       ? 'bg-brand-charcoal text-brand-cream'
-                      : 'opacity-60 hover:opacity-100'
+                      : 'text-muted hover:text-brand-charcoal'
                   }`}
                 >
                   {s} · £{p}
@@ -158,7 +159,7 @@ export default function JuiceCard({ juice, index = 0 }) {
                   whileTap={{ scale: 0.88 }}
                   whileHover={{ scale: 1.08 }}
                   aria-label={`Add ${juice.name} to cart`}
-                  className="relative w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-brand-charcoal text-brand-cream flex items-center justify-center transition-colors"
+                  className="relative w-11 h-11 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full bg-brand-charcoal text-brand-cream flex items-center justify-center transition-colors"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
@@ -178,7 +179,7 @@ export default function JuiceCard({ juice, index = 0 }) {
                     onClick={handleDecrement}
                     whileTap={{ scale: 0.85 }}
                     aria-label={`Remove one ${juice.name}`}
-                    className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                    className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="5" y1="12" x2="19" y2="12" />
@@ -199,7 +200,7 @@ export default function JuiceCard({ juice, index = 0 }) {
                     onClick={handleAdd}
                     whileTap={{ scale: 0.85 }}
                     aria-label={`Add another ${juice.name}`}
-                    className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                    className="w-9 h-9 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19" />

@@ -9,11 +9,11 @@ export default function TermsOfService() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
         >
-          <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">Terms of Service</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Terms of Service</p>
           <h1 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-tight mb-4">
             The fine print, in plain English.
           </h1>
-          <p className="text-sm opacity-50 mb-12">Last updated: April 2026</p>
+          <p className="text-sm text-subtle mb-12">Last updated: April 2026</p>
 
           <div className="space-y-10 text-base leading-relaxed">
             <Section title="1. About us">

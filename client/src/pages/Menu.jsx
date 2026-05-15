@@ -37,7 +37,7 @@ export default function Menu() {
           transition={{ duration: 0.7 }}
           className="mb-12 md:mb-16 max-w-3xl"
         >
-          <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">The full menu</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-faint mb-4">The full menu</p>
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
             No water.
             <br />
@@ -45,7 +45,7 @@ export default function Menu() {
             <br />
             <em>No preservatives.</em>
           </h1>
-          <p className="mt-8 text-lg opacity-60 max-w-xl leading-relaxed">
+          <p className="mt-8 text-lg text-muted max-w-xl leading-relaxed">
             Forty-plus recipes across five categories. Build your own from scratch or pick a signature.
           </p>
         </motion.div>
@@ -87,7 +87,7 @@ export default function Menu() {
                 <section key={cat.id} id={cat.id}>
                   <div className="flex items-end justify-between flex-wrap gap-4 mb-8 md:mb-10 pb-6 border-b border-current/10">
                     <h2 className="font-display text-2xl md:text-4xl tracking-tight">{cat.label}</h2>
-                    <p className="text-xs md:text-sm opacity-50 tracking-wide">{cat.subtitle}</p>
+                    <p className="text-xs md:text-sm text-subtle tracking-wide">{cat.subtitle}</p>
                   </div>
                   <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
                     {cat.items.map((juice, i) => (
@@ -105,7 +105,7 @@ export default function Menu() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-24 pt-8 border-t border-current/10 text-xs uppercase tracking-[0.25em] opacity-50 text-center"
+          className="mt-24 pt-8 border-t border-current/10 text-xs uppercase tracking-[0.3em] text-faint text-center"
         >
           Allergy warning · Our juices contain different kinds of nuts · Review ingredients before ordering
         </motion.div>
@@ -118,10 +118,11 @@ function CategoryPill({ label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`px-5 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all ${
+      aria-pressed={active}
+      className={`min-h-[44px] px-5 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all ${
         active
           ? 'bg-brand-charcoal text-brand-cream'
-          : 'border border-current/15 hover:border-current/40 opacity-70 hover:opacity-100'
+          : 'border border-muted text-muted hover:text-brand-charcoal hover:border-black/40'
       }`}
     >
       {label}
