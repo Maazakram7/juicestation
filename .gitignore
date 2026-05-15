@@ -29,3 +29,6 @@ yarn-debug.log*
 # Local backups
 *.bak
 *.orig
+
+# Local screenshots from the design review run
+screenshots/

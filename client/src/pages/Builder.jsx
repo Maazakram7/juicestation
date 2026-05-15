@@ -53,7 +53,7 @@ function IngredientTile({ ing, index, isSelected, onToggle }) {
         <div className="text-3xl md:text-5xl">{ing.emoji}</div>
         <div className="absolute bottom-3 left-3 right-3 md:bottom-5 md:left-5 md:right-5">
           <p className="font-display text-sm md:text-lg leading-none">{ing.name}</p>
-          <p className="text-[10px] md:text-xs opacity-50 mt-1 tabular-nums">£{ing.price.toFixed(2)}</p>
+          <p className="text-[10px] md:text-xs text-subtle mt-1 tabular-nums">£{ing.price.toFixed(2)}</p>
         </div>
       </motion.button>
     </motion.div>
@@ -180,22 +180,7 @@ export default function Builder() {
 
   return (
     <div className="pt-28 md:pt-40 pb-32 lg:pb-24">
-      <style>{`
-        @keyframes toastPop {
-          0%   { transform: translateY(-20px) scale(0.85); opacity: 0; }
-          50%  { transform: translateY(2px) scale(1.03); opacity: 1; }
-          100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        @keyframes toastFade {
-          from { opacity: 1; transform: translateY(0) scale(1); }
-          to   { opacity: 0; transform: translateY(-8px) scale(0.92); }
-        }
-        .js-toast {
-          animation: toastPop 0.32s cubic-bezier(0.2, 0.8, 0.2, 1.2) forwards,
-                     toastFade 0.25s ease-out 1.7s forwards;
-          will-change: transform, opacity;
-        }
-      `}</style>
+      {/* Toast keyframes moved into index.css — see .js-toast utility */}
 
       <div className="max-w-7xl mx-auto px-5 md:px-10">
         <motion.div
@@ -204,13 +189,13 @@ export default function Builder() {
           transition={{ duration: 0.7 }}
           className="mb-8 md:mb-16 max-w-3xl"
         >
-          <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-50 mb-3 md:mb-4">Build Your Own</p>
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-faint mb-3 md:mb-4">Build Your Own</p>
           <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-[0.95]">
             Your juice,
             <br />
             <em className="not-italic text-brand-green-deep">your rules.</em>
           </h1>
-          <p className="mt-4 md:mt-8 text-sm md:text-lg opacity-60 max-w-xl leading-relaxed">
+          <p className="mt-4 md:mt-8 text-sm md:text-lg text-muted max-w-xl leading-relaxed">
             Craft your perfect blend &mdash; select up to {MAX_CUSTOM_INGREDIENTS} ingredients, pick your size, and we&apos;ll press it fresh.
           </p>
         </motion.div>
@@ -232,7 +217,7 @@ export default function Builder() {
 
           <aside className="hidden lg:block lg:col-span-4">
             <div className="lg:sticky lg:top-28 rounded-[28px] bg-white border border-black/[0.06] p-6 md:p-8">
-              <p className="text-xs uppercase tracking-[0.2em] opacity-50 mb-3">Your juice</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-faint mb-3">Your juice</p>
               <div className="flex items-baseline justify-between mb-6">
                 <h3 className="font-display text-3xl">
                   {selected.length === 0 ? 'Empty bottle' : `${selected.length} ${selected.length === 1 ? 'ingredient' : 'ingredients'}`}
@@ -246,7 +231,7 @@ export default function Builder() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="text-sm opacity-50 italic"
+                      className="text-sm text-subtle italic"
                     >
                       Start picking ingredients on the left.
                     </motion.p>
@@ -264,21 +249,22 @@ export default function Builder() {
                             className="flex items-center justify-between text-sm"
                           >
                             <span className="flex items-center gap-2">
-                              <span className="text-lg">{ing.emoji}</span>
+                              <span className="text-lg" aria-hidden="true">{ing.emoji}</span>
                               {ing.name}
                             </span>
                             <button
                               onClick={() => toggle(id)}
-                              className="tabular-nums opacity-60 hover:opacity-100 hover:text-brand-melon transition-colors"
+                              aria-label={`Remove ${ing.name}`}
+                              className="tabular-nums text-muted hover:text-brand-melon-deep transition-colors"
                             >
-                              £{ing.price.toFixed(2)} ×
+                              £{ing.price.toFixed(2)} <span aria-hidden="true">×</span>
                             </button>
                           </motion.li>
                         );
                       })}
                       <li className="flex items-center justify-between text-sm pt-2 border-t border-black/5">
-                        <span className="opacity-60">Bottle &amp; press ({size})</span>
-                        <span className="tabular-nums opacity-60">£{(BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size]).toFixed(2)}</span>
+                        <span className="text-muted">Bottle &amp; press ({size})</span>
+                        <span className="tabular-nums text-muted">£{(BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size]).toFixed(2)}</span>
                       </li>
                     </ul>
                   )}
@@ -287,13 +273,13 @@ export default function Builder() {
 
               {selected.length > 0 && (
                 <div className="mb-5">
-                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-2">Size</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-2">Size</p>
                   <SizeSelector size={size} onChange={setSize} total={total} />
                 </div>
               )}
 
               <div className="flex items-baseline justify-between pt-4 border-t border-black/10 mb-6">
-                <span className="text-sm opacity-60">Total</span>
+                <span className="text-sm text-muted">Total</span>
                 <span className="font-display text-3xl tabular-nums">
                   £{total.toFixed(2)}
                 </span>
@@ -335,7 +321,7 @@ export default function Builder() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="text-xs text-center opacity-60 mt-3"
+                    className="text-xs text-center text-muted mt-3"
                   >
                     In your cart. Build another?
                   </motion.p>
@@ -347,7 +333,7 @@ export default function Builder() {
       </div>
 
       {/* Toast stack */}
-      <div className="fixed top-24 md:top-28 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center gap-2">
+      <div className="fixed top-24 md:top-28 left-1/2 -translate-x-1/2 z-toast pointer-events-none flex flex-col items-center gap-2">
         {toasts.map((t) => (
           <div key={t.id} className="js-toast">
             <div
@@ -359,7 +345,7 @@ export default function Builder() {
                   : 'bg-brand-melon text-white'
               }`}
             >
-              <span className="text-2xl">{t.emoji}</span>
+              <span className="text-2xl" aria-hidden="true">{t.emoji}</span>
               <div className="text-sm">
                 <p className="font-medium leading-tight">
                   {t.action === 'added' && `${t.name} added`}
@@ -432,10 +418,10 @@ export default function Builder() {
                   className="pointer-events-auto mx-3 mb-1 rounded-2xl bg-white border border-black/[0.08] shadow-2xl p-4 max-h-[60vh] overflow-y-auto"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] uppercase tracking-[0.2em] opacity-50">Your juice</p>
+                    <p className="text-[10px] uppercase tracking-[0.3em] opacity-70">Your juice</p>
                     <button
                       onClick={() => setMobileDrawerOpen(false)}
-                      className="text-xs opacity-60"
+                      className="text-xs underline opacity-70 hover:opacity-100"
                     >
                       Close
                     </button>
@@ -453,27 +439,28 @@ export default function Builder() {
                           className="flex items-center justify-between text-sm py-1"
                         >
                           <span className="flex items-center gap-2">
-                            <span className="text-lg">{ing.emoji}</span>
+                            <span className="text-lg" aria-hidden="true">{ing.emoji}</span>
                             {ing.name}
                           </span>
                           <button
                             onClick={() => toggle(id)}
+                            aria-label={`Remove ${ing.name}`}
                             className="flex items-center gap-2 text-xs"
                           >
-                            <span className="tabular-nums opacity-60">£{ing.price.toFixed(2)}</span>
-                            <span className="w-6 h-6 rounded-full border border-current/20 flex items-center justify-center opacity-60">×</span>
+                            <span className="tabular-nums text-muted">£{ing.price.toFixed(2)}</span>
+                            <span aria-hidden="true" className="w-6 h-6 rounded-full border border-current/20 flex items-center justify-center text-muted">×</span>
                           </button>
                         </motion.li>
                       );
                     })}
                     <li className="flex items-center justify-between text-xs pt-2 border-t border-black/5">
-                      <span className="opacity-60">Bottle &amp; press ({size})</span>
-                      <span className="tabular-nums opacity-60">£{(BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size]).toFixed(2)}</span>
+                      <span className="text-muted">Bottle &amp; press ({size})</span>
+                      <span className="tabular-nums text-muted">£{(BASE_CUSTOM_PRICE + CUSTOM_SIZE_UPCHARGE[size]).toFixed(2)}</span>
                     </li>
                   </ul>
 
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 mb-2">Size</p>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-faint mb-2">Size</p>
                     <SizeSelector size={size} onChange={setSize} total={total} />
                   </div>
                 </motion.div>
@@ -487,7 +474,7 @@ export default function Builder() {
                 className="flex-1 flex items-center justify-between text-left"
               >
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-50">
+                  <p className="text-[10px] uppercase tracking-[0.3em] opacity-70">
                     {added ? 'Added' : `${selected.length} ${selected.length === 1 ? 'item' : 'items'} · ${size}`}
                   </p>
                   <p className="font-display text-lg tabular-nums">
@@ -497,7 +484,8 @@ export default function Builder() {
                 {selected.length > 0 && !added && (
                   <motion.span
                     animate={{ rotate: mobileDrawerOpen ? 180 : 0 }}
-                    className="text-xs opacity-60 mr-3"
+                    aria-hidden="true"
+                    className="text-xs opacity-70 mr-3"
                   >
                     ▼
                   </motion.span>

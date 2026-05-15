@@ -13,13 +13,13 @@ export default function Footer() {
               <br />
               <em className="not-italic text-brand-green-deep">No compromise.</em>
             </p>
-            <p className="mt-6 text-sm opacity-60 max-w-sm leading-relaxed">
+            <p className="mt-6 text-sm text-muted max-w-sm leading-relaxed">
               Cold-pressed organic juices, made fresh in Bracknell, Berkshire. No water. No sugar. No additives. Nothing hidden.
             </p>
           </div>
 
           <div className="md:col-span-3">
-            <h4 className="text-xs uppercase tracking-[0.2em] opacity-50 mb-4">Shop</h4>
+            <h4 className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Shop</h4>
             <ul className="space-y-2.5 text-sm">
               <li><Link to="/menu" className="hover:text-brand-green-deep transition-colors">All juices</Link></li>
               <li><Link to="/builder" className="hover:text-brand-green-deep transition-colors">Build your own</Link></li>
@@ -28,7 +28,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-xs uppercase tracking-[0.2em] opacity-50 mb-4">Visit</h4>
+            <h4 className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Visit</h4>
             <ul className="space-y-2.5 text-sm">
               <li>Bracknell</li>
               <li>Berkshire, UK</li>
@@ -37,7 +37,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-xs uppercase tracking-[0.2em] opacity-50 mb-4">Follow</h4>
+            <h4 className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Follow</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <a href="https://www.instagram.com/juiceestationuk/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-brand-green-deep transition-colors" aria-label="Follow on Instagram">
@@ -73,12 +73,12 @@ export default function Footer() {
           </h2>
         </motion.div>
 
-        <div className="mt-8 pt-8 border-t border-black/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs opacity-50">
+        <div className="mt-8 pt-8 border-t border-black/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-subtle">
           <p>© {new Date().getFullYear()} JUICEeSTATION. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link to="/privacy" className="hover:opacity-100 transition-opacity">Privacy</Link>
-            <Link to="/terms" className="hover:opacity-100 transition-opacity">Terms</Link>
-            <Link to="/allergens" className="hover:opacity-100 transition-opacity">Allergens</Link>
+            <Link to="/privacy" className="hover:text-brand-charcoal transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-brand-charcoal transition-colors">Terms</Link>
+            <Link to="/allergens" className="hover:text-brand-charcoal transition-colors">Allergens</Link>
           </div>
         </div>
       </div>

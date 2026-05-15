@@ -1,10 +1,17 @@
 import { motion } from 'framer-motion';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 
 export default function OrderSuccess() {
   const [params] = useSearchParams();
-  const orderId = params.get('id') || 'JS-XXXXX';
+  const orderId = params.get('id');
   const isSubscription = params.get('type') === 'subscription';
+
+  // If a user lands here directly (no id in the URL) we have nothing to
+  // show. Redirect them to the menu instead of revealing the placeholder
+  // "JS-XXXXX" string, which leaks the ID format and looks broken.
+  if (!orderId) {
+    return <Navigate to="/menu" replace />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12 relative overflow-hidden">
@@ -63,7 +70,7 @@ export default function OrderSuccess() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4"
+          className="text-xs uppercase tracking-[0.3em] text-faint mb-4"
         >
           {isSubscription ? 'Subscription received' : 'Order confirmed'}
         </motion.p>
@@ -81,7 +88,7 @@ export default function OrderSuccess() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.95 }}
-          className="text-lg opacity-70 leading-relaxed mb-10 max-w-md mx-auto"
+          className="text-lg text-muted leading-relaxed mb-10 max-w-md mx-auto"
         >
           {isSubscription
             ? "We'll email you within 24 hours to confirm your first delivery date and set up billing. Your first Monday is going to be tasty."
@@ -94,7 +101,7 @@ export default function OrderSuccess() {
           transition={{ delay: 1.1 }}
           className="inline-block px-6 py-4 rounded-2xl bg-white border border-black/[0.06] mb-10"
         >
-          <p className="text-xs uppercase tracking-[0.2em] opacity-50 mb-1">
+          <p className="text-xs uppercase tracking-[0.3em] text-faint mb-1">
             {isSubscription ? 'Subscription ID' : 'Order ID'}
           </p>
           <p className="font-mono text-lg tabular-nums">{orderId}</p>

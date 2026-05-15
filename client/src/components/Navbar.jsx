@@ -17,10 +17,21 @@ export default function Navbar() {
   const location = useLocation();
 
   useEffect(() => {
+    // Track the scroll position at the moment the menu opens; only close
+    // the menu after a *deliberate* scroll (>50px) so the iOS momentum
+    // bounce / address-bar tap doesn't dismiss the menu prematurely.
+    let openedAtY = null;
     const onScroll = () => {
-      setScrolled(window.scrollY > 20);
-      // Close mobile menu as soon as user starts scrolling
-      setMobileOpen((open) => (open ? false : open));
+      const y = window.scrollY;
+      setScrolled(y > 20);
+      setMobileOpen((open) => {
+        if (!open) {
+          openedAtY = null;
+          return open;
+        }
+        if (openedAtY == null) openedAtY = y;
+        return Math.abs(y - openedAtY) > 50 ? false : open;
+      });
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -34,7 +45,7 @@ export default function Navbar() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 inset-x-0 z-nav transition-all duration-500 ${
         scrolled
           ? 'bg-brand-cream/95 border-b border-black/5'
           : 'bg-transparent'
@@ -46,7 +57,7 @@ export default function Navbar() {
           <img
             src="/logo.png"
             alt="JUICEeSTATION"
-            className="h-14 md:h-16 w-auto transition-transform duration-500 group-hover:scale-[1.03])]"
+            className="h-14 md:h-16 w-auto transition-transform duration-500 group-hover:scale-[1.03]"
           />
         </Link>
 
@@ -61,7 +72,7 @@ export default function Navbar() {
                 `group relative px-4 py-2 text-sm font-medium tracking-wide rounded-full transition-all duration-300 ease-out hover:-translate-y-0.5 ${
                   isActive
                     ? 'text-brand-green-deep'
-                    : 'opacity-70 hover:opacity-100'
+                    : 'text-muted hover:text-brand-charcoal'
                 }`
               }
             >
@@ -148,7 +159,7 @@ export default function Navbar() {
                   end={l.to === '/'}
                   className={({ isActive }) =>
                     `py-3 text-lg font-display tracking-tight ${
-                      isActive ? 'text-brand-green-deep' : 'opacity-80'
+                      isActive ? 'text-brand-green-deep' : 'text-brand-charcoal'
                     }`
                   }
                 >

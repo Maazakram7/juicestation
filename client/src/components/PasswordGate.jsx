@@ -40,16 +40,18 @@ export default function PasswordGate({ children }) {
       <div className="max-w-md w-full text-center">
         <div className="text-5xl mb-6">🧃</div>
         <h1 className="font-display text-3xl mb-3">Coming soon</h1>
-        <p className="opacity-60 mb-8 text-sm">
+        <p className="text-muted mb-8 text-sm">
           Site under construction. Enter the preview password to continue.
         </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="password"
+            name="password"
+            autoComplete="current-password"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className={`w-full px-5 py-3.5 rounded-2xl bg-white border ${
-              error ? 'border-brand-melon' : 'border-black/10'
+              error ? 'border-brand-melon-deep' : 'border-black/10'
             } focus:outline-none focus:border-brand-green transition-all`}
             placeholder="Password"
             autoFocus
@@ -59,7 +61,9 @@ export default function PasswordGate({ children }) {
           </button>
         </form>
         {error && (
-          <p className="text-sm text-brand-melon mt-4">Incorrect password.</p>
+          <p role="alert" className="text-sm text-brand-melon-deep mt-4">
+            Incorrect password.
+          </p>
         )}
       </div>
     </div>

@@ -19,7 +19,7 @@ export default function CartDrawer() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             onClick={close}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-drawer-bg"
           />
 
           {/* Panel */}
@@ -28,12 +28,12 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-brand-cream z-[70] flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-brand-cream z-drawer flex flex-col shadow-2xl"
           >
             {/* Header */}
             <header className="px-6 py-6 border-b border-black/5 flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] opacity-50">Your order</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-faint">Your order</p>
                 <h2 className="font-display text-2xl mt-0.5">
                   {items.length === 0 ? 'Empty for now' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
                 </h2>
@@ -54,10 +54,10 @@ export default function CartDrawer() {
             <div className="flex-1 overflow-y-auto">
               {items.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center px-6 text-center">
-                  <div className="text-6xl mb-6 opacity-30">🧃</div>
+                  <div className="text-6xl mb-6 opacity-30" aria-hidden="true">🧃</div>
                   <p className="font-display text-xl mb-2">Nothing here yet.</p>
-                  <p className="text-sm opacity-60 mb-2">Pick a juice — or build one from scratch.</p>
-                  <p className="text-xs opacity-50 mb-8">£{ONE_OFF_MIN_ORDER} minimum order for delivery</p>
+                  <p className="text-sm text-muted mb-2">Pick a juice — or build one from scratch.</p>
+                  <p className="text-xs text-subtle mb-8">£{ONE_OFF_MIN_ORDER} minimum order for delivery</p>
                   <Link to="/menu" onClick={close} className="btn-primary">
                     Browse the menu
                   </Link>
@@ -78,9 +78,9 @@ export default function CartDrawer() {
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate">{item.name}</p>
                           {item.meta && (
-                            <p className="text-xs opacity-50 mt-0.5 truncate">{item.meta}</p>
+                            <p className="text-xs text-subtle mt-0.5 truncate">{item.meta}</p>
                           )}
-                          <p className="text-sm opacity-60 mt-1 tabular-nums">£{item.price.toFixed(2)}</p>
+                          <p className="text-sm text-muted mt-1 tabular-nums">£{item.price.toFixed(2)}</p>
                         </div>
 
                         {/* Qty stepper */}
@@ -100,10 +100,10 @@ export default function CartDrawer() {
 
                         <button
                           onClick={() => remove(item.id)}
-                          aria-label="Remove"
-                          className="text-xs opacity-40 hover:opacity-100 hover:text-brand-melon transition-all"
+                          aria-label={`Remove ${item.name}`}
+                          className="w-8 h-8 flex items-center justify-center text-xs text-subtle hover:text-brand-melon-deep transition-all"
                         >
-                          ✕
+                          <span aria-hidden="true">✕</span>
                         </button>
                       </motion.li>
                     ))}
@@ -116,17 +116,17 @@ export default function CartDrawer() {
             {items.length > 0 && (
               <footer className="px-6 py-6 border-t border-black/5 bg-white/50">
                 <div className="flex items-baseline justify-between mb-4">
-                  <span className="text-sm opacity-60">Subtotal</span>
+                  <span className="text-sm text-muted">Subtotal</span>
                   <span className="font-display text-2xl tabular-nums">£{total.toFixed(2)}</span>
                 </div>
 
                 {/* Minimum order indicator */}
                 {!meetsMinimum ? (
                   <div className="mb-4 px-4 py-3 rounded-2xl bg-brand-melon/10 border border-brand-melon/20">
-                    <p className="text-sm font-medium text-brand-melon">
+                    <p className="text-sm font-medium text-brand-melon-deep">
                       Add £{remaining.toFixed(2)} more for delivery
                     </p>
-                    <p className="text-xs opacity-70 mt-0.5">
+                    <p className="text-xs text-muted mt-0.5">
                       £{ONE_OFF_MIN_ORDER} minimum order
                     </p>
                   </div>
@@ -154,7 +154,7 @@ export default function CartDrawer() {
                   </button>
                 )}
 
-                <p className="text-center text-xs opacity-50 mt-3">
+                <p className="text-center text-xs text-subtle mt-3">
                   Delivered fresh, daily. Bracknell area.
                 </p>
               </footer>

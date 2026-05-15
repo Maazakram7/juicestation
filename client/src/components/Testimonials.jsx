@@ -41,9 +41,9 @@ const ROW_2 = REVIEWS.slice(12);
 function ReviewCard({ r }) {
   return (
     <figure className="flex-shrink-0 w-[82vw] sm:w-[440px] md:w-[500px] mx-3 md:mx-4 px-7 md:px-8 py-7 md:py-8 rounded-[24px] bg-white border border-black/[0.06]">
-      <div className="flex items-center gap-0.5 mb-4" aria-label="5 star rating">
+      <div className="flex items-center gap-0.5 mb-4" role="img" aria-label="5 star rating">
         {Array.from({ length: 5 }).map((_, i) => (
-          <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#F39324">
+          <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#F39324" aria-hidden="true">
             <path d="M12 2l2.9 6.9L22 10l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.2L2 10l7.1-1.1L12 2z" />
           </svg>
         ))}
@@ -53,7 +53,7 @@ function ReviewCard({ r }) {
       </blockquote>
       <figcaption className="flex items-center justify-between text-sm">
         <cite className="not-italic font-medium">{r.name}</cite>
-        <span className="opacity-40 text-[11px] uppercase tracking-wider">Google review</span>
+        <span className="text-faint text-[11px] uppercase tracking-[0.3em]">Google review</span>
       </figcaption>
     </figure>
   );
@@ -91,7 +91,7 @@ export default function Testimonials() {
           className="flex flex-col md:flex-row md:items-end justify-between gap-8"
         >
           <div className="max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">Loved locally</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Loved locally</p>
             <h2 className="font-display text-3xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight">
               321+ reviews.
               <br />
@@ -100,7 +100,6 @@ export default function Testimonials() {
           </div>
           <a
             href="https://search.google.com/local/reviews?placeid=ChIJIWr1WAB1dkgRzlYc2_8nI6w"
-
             target="_blank"
             rel="noopener noreferrer"
             className="btn-ghost shrink-0"
@@ -125,32 +124,7 @@ export default function Testimonials() {
         <MarqueeRow items={ROW_1} duration={90} />
         <MarqueeRow items={ROW_2} reverse duration={110} />
       </div>
-
-      {/* Animation keyframes — scoped inline, not in Tailwind config */}
-      <style>{`
-        :root { --edge-fade: #FAF7F1; }
-        .dark { --edge-fade: #1B1B1B; }
-        @keyframes marquee-forward {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
-        @keyframes marquee-reverse {
-          from { transform: translateX(-50%); }
-          to   { transform: translateX(0); }
-        }
-        .animate-marquee-forward { animation: marquee-forward linear infinite; }
-        .animate-marquee-reverse { animation: marquee-reverse linear infinite; }
-        @media (prefers-reduced-motion: reduce) {
-          .animate-marquee-forward, .animate-marquee-reverse { animation: none; }
-        }
-        /* Line-clamp utility (Tailwind v3 has it but just in case) */
-        .line-clamp-4 {
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
+      {/* Marquee + line-clamp utilities defined globally in index.css */}
     </section>
   );
 }

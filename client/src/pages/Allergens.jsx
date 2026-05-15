@@ -9,15 +9,17 @@ export default function Allergens() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
         >
-          <p className="text-xs uppercase tracking-[0.3em] opacity-50 mb-4">Allergen Information</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-faint mb-4">Allergen Information</p>
           <h1 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-tight mb-4">
             Know what's in your juice.
           </h1>
-          <p className="text-sm opacity-50 mb-12">Last updated: April 2026</p>
+          <p className="text-sm text-subtle mb-12">Last updated: April 2026</p>
 
           <div className="space-y-10 text-base leading-relaxed">
-            <div className="p-6 rounded-2xl bg-brand-melon/10 border border-brand-melon/20">
-              <p className="text-sm font-medium text-brand-melon">⚠ If you have a food allergy or intolerance, please read this page carefully before ordering. Your safety is your responsibility — we cannot be held liable if you order a juice containing an ingredient you are allergic to.</p>
+            <div role="alert" className="p-6 rounded-2xl bg-brand-melon/10 border border-brand-melon/30">
+              <p className="text-sm font-medium text-brand-melon-deep">
+                <span aria-hidden="true">⚠ </span>If you have a food allergy or intolerance, please read this page carefully before ordering. Your safety is your responsibility — we cannot be held liable if you order a juice containing an ingredient you are allergic to.
+              </p>
             </div>
 
             <Section title="The 14 major allergens">
