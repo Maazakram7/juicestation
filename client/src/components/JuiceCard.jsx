@@ -159,7 +159,7 @@ export default function JuiceCard({ juice, index = 0 }) {
                   whileTap={{ scale: 0.88 }}
                   whileHover={{ scale: 1.08 }}
                   aria-label={`Add ${juice.name} to cart`}
-                  className="relative w-11 h-11 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full bg-brand-charcoal text-brand-cream flex items-center justify-center transition-colors"
+                  className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full bg-brand-charcoal text-brand-cream flex items-center justify-center transition-colors shrink-0"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
@@ -173,7 +173,7 @@ export default function JuiceCard({ juice, index = 0 }) {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.2 }}
-                  className="flex items-center gap-1 bg-brand-charcoal text-brand-cream rounded-full p-1"
+                  className="flex items-center gap-0.5 sm:gap-1 bg-brand-charcoal text-brand-cream rounded-full p-0.5 sm:p-1 shrink-0"
                 >
                   <motion.button
                     onClick={handleDecrement}
@@ -191,7 +191,7 @@ export default function JuiceCard({ juice, index = 0 }) {
                     initial={{ scale: 1.3, y: -2 }}
                     animate={{ scale: 1, y: 0 }}
                     transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-                    className="font-display text-sm sm:text-base md:text-lg tabular-nums min-w-[14px] text-center"
+                    className="font-display text-xs sm:text-base md:text-lg tabular-nums min-w-[12px] sm:min-w-[14px] text-center"
                   >
                     {qtyInCart}
                   </motion.span>
