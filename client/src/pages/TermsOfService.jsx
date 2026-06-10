@@ -1,8 +1,14 @@
 import { motion } from 'framer-motion';
+import Seo from '../components/Seo';
 
 export default function TermsOfService() {
   return (
     <div className="pt-32 md:pt-40 pb-24">
+      <Seo
+        title="Terms of Service"
+        description="The terms that apply when you order from or use the JUICEeSTATION website."
+        path="/terms"
+      />
       <div className="max-w-3xl mx-auto px-6 md:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

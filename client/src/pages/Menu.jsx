@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef } from 'react';
 import JuiceCard from '../components/JuiceCard';
+import Seo from '../components/Seo';
 import { CATEGORIES } from '../data/menu';
 
 export default function Menu() {
@@ -29,6 +30,11 @@ export default function Menu() {
 
   return (
     <div className="pt-32 md:pt-40 pb-24">
+      <Seo
+        title="Juice & Smoothie Menu"
+        description="Browse the full JUICEeSTATION menu — cold-pressed veggie juices, fresh fruit juices, smoothies and protein shakes. Signature blends like Red Rush, Slim Grin and Turmeric Power, all made fresh in Bracknell."
+        path="/menu"
+      />
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         {/* Header */}
         <motion.div

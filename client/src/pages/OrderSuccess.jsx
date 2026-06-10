@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import Seo from '../components/Seo';
 
 export default function OrderSuccess() {
   const [params] = useSearchParams();
@@ -15,6 +16,7 @@ export default function OrderSuccess() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12 relative overflow-hidden">
+      <Seo title="Order Confirmed" path="/order-success" noindex />
       {/* Celebratory floating elements */}
       {Array.from({ length: 12 }).map((_, i) => (
         <motion.div

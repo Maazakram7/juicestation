@@ -1,8 +1,14 @@
 import { motion } from 'framer-motion';
+import Seo from '../components/Seo';
 
 export default function PrivacyPolicy() {
   return (
     <div className="pt-32 md:pt-40 pb-24">
+      <Seo
+        title="Privacy Policy"
+        description="How JUICEeSTATION collects, uses and protects your personal data."
+        path="/privacy"
+      />
       <div className="max-w-3xl mx-auto px-6 md:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -4,6 +4,7 @@ import ScrollStory from '../components/ScrollStory';
 import Testimonials from '../components/Testimonials';
 import JuiceCard from '../components/JuiceCard';
 import { MENU } from '../data/menu';
+import Seo from '../components/Seo';
 
 const HEADLINE = ['Pure.', 'Fresh.', 'No compromise.'];
 
@@ -12,6 +13,11 @@ export default function Home() {
 
   return (
     <>
+      <Seo
+        title="Cold-Pressed Organic Juices in Bracknell"
+        description="Fresh cold-pressed organic juices, smoothies and protein shakes made daily in Bracknell, Berkshire. No water, no sugar, no additives — rated 5.0★ across 321+ Google reviews. Visit us at The Lexicon or subscribe for weekly delivery."
+        path="/"
+      />
       <section className="relative min-h-[85vh] md:min-h-screen flex items-start md:items-center overflow-hidden pt-28 md:pt-20 pb-6 md:pb-0">
         <video
           src="/hero.mp4"

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Seo from '../components/Seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 const STORAGE_KEY = 'js_admin_token';
@@ -131,6 +132,7 @@ function NotifyProvider({ children }) {
 export default function AdminOrders() {
   return (
     <NotifyProvider>
+      <Seo title="Admin — Orders" path="/admin/orders" noindex />
       <AdminOrdersInner />
     </NotifyProvider>
   );

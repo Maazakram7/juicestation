@@ -1,24 +1,123 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#7DC242" />
 
-    <!-- SEO -->
-    <title>JUICEeSTATION — Pure. Fresh. No Compromise.</title>
+    <!-- Canonical & crawl directives -->
+    <link rel="canonical" href="https://www.juiceestation.co.uk/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+    <!-- Primary SEO -->
+    <title>JUICEeSTATION — Cold-Pressed Organic Juices in Bracknell, Berkshire</title>
     <meta
       name="description"
-      content="Cold-pressed organic juices from Bracknell, Berkshire. No water. No sugar. No additives. Just fruit, vegetables, and the truth."
+      content="Cold-pressed organic juices, smoothies and protein shakes made fresh in Bracknell, Berkshire. No water, no sugar, no additives — rated 5.0★ across 321+ Google reviews. Visit us at The Lexicon or subscribe for weekly delivery (RG12, RG40, RG42)."
     />
-    <meta name="keywords" content="juice, organic juice, cold-pressed, Bracknell, Berkshire, detox, wellness" />
+    <meta name="keywords" content="cold-pressed juice Bracknell, organic juice Berkshire, fresh juice The Lexicon, smoothies Bracknell, protein shakes Bracknell, juice delivery RG12, detox juice, healthy drinks Bracknell" />
+    <meta name="author" content="JUICEeSTATION" />
+
+    <!-- Local geo signals -->
+    <meta name="geo.region" content="GB-BRC" />
+    <meta name="geo.placename" content="Bracknell, Berkshire" />
+    <meta name="geo.position" content="51.4158;-0.7524" />
+    <meta name="ICBM" content="51.4158, -0.7524" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="JUICEeSTATION — Pure. Fresh. No Compromise." />
-    <meta property="og:description" content="Organic cold-pressed juices. Nothing added, nothing hidden." />
-    <meta property="og:image" content="/logo.png" />
+    <meta property="og:site_name" content="JUICEeSTATION" />
+    <meta property="og:title" content="JUICEeSTATION — Cold-Pressed Organic Juices in Bracknell" />
+    <meta property="og:description" content="Organic cold-pressed juices, smoothies and protein shakes. Nothing added, nothing hidden. 5.0★ across 321+ Google reviews." />
+    <meta property="og:image" content="https://www.juiceestation.co.uk/logo.png" />
+    <meta property="og:image:alt" content="JUICEeSTATION logo" />
+    <meta property="og:url" content="https://www.juiceestation.co.uk/" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_GB" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JUICEeSTATION — Cold-Pressed Organic Juices in Bracknell" />
+    <meta name="twitter:description" content="Organic cold-pressed juices, smoothies and protein shakes. Nothing added, nothing hidden. 5.0★ across 321+ Google reviews." />
+    <meta name="twitter:image" content="https://www.juiceestation.co.uk/logo.png" />
+
+    <!-- Structured data: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "https://www.juiceestation.co.uk/#organization",
+      "name": "JUICEeSTATION",
+      "url": "https://www.juiceestation.co.uk/",
+      "logo": "https://www.juiceestation.co.uk/logo.png",
+      "email": "hello@juiceestation.co.uk",
+      "description": "Cold-pressed organic juices, smoothies and protein shakes made fresh in Bracknell, Berkshire.",
+      "sameAs": [
+        "https://www.instagram.com/juiceestationuk/",
+        "https://search.google.com/local/reviews?placeid=ChIJIWr1WAB1dkgRzlYc2_8nI6w"
+      ]
+    }
+    </script>
+
+    <!-- Structured data: LocalBusiness / FoodEstablishment -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["FoodEstablishment", "Store"],
+      "@id": "https://www.juiceestation.co.uk/#localbusiness",
+      "name": "JUICEeSTATION",
+      "image": "https://www.juiceestation.co.uk/logo.png",
+      "logo": "https://www.juiceestation.co.uk/logo.png",
+      "url": "https://www.juiceestation.co.uk/",
+      "email": "hello@juiceestation.co.uk",
+      "priceRange": "££",
+      "servesCuisine": ["Juice", "Smoothies", "Health Food"],
+      "currenciesAccepted": "GBP",
+      "paymentAccepted": "Cash, Credit Card, Debit Card",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Princess Square, The Lexicon",
+        "addressLocality": "Bracknell",
+        "addressRegion": "Berkshire",
+        "postalCode": "RG12 1LS",
+        "addressCountry": "GB"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 51.4158,
+        "longitude": -0.7524
+      },
+      "areaServed": [
+        { "@type": "PostalCodeRangeSpecification", "postalCodePrefix": "RG12" },
+        { "@type": "PostalCodeRangeSpecification", "postalCodePrefix": "RG40" },
+        { "@type": "PostalCodeRangeSpecification", "postalCodePrefix": "RG42" }
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.0",
+        "reviewCount": "321",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "sameAs": [
+        "https://www.instagram.com/juiceestationuk/",
+        "https://search.google.com/local/reviews?placeid=ChIJIWr1WAB1dkgRzlYc2_8nI6w"
+      ]
+    }
+    </script>
+
+    <!-- Structured data: WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://www.juiceestation.co.uk/#website",
+      "url": "https://www.juiceestation.co.uk/",
+      "name": "JUICEeSTATION",
+      "publisher": { "@id": "https://www.juiceestation.co.uk/#organization" },
+      "inLanguage": "en-GB"
+    }
+    </script>
 
     <!-- Fonts: PP Neue Montreal (Lusion/Oryzo signature typeface) -->
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin />

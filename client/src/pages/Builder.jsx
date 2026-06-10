@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMemo, useState, useRef } from 'react';
 import { INGREDIENTS, BASE_CUSTOM_PRICE, MAX_CUSTOM_INGREDIENTS, CUSTOM_SIZE_UPCHARGE } from '../data/menu';
 import { useCart } from '../context/CartContext';
+import Seo from '../components/Seo';
 
 function IngredientTile({ ing, index, isSelected, onToggle }) {
   return (
@@ -180,6 +181,11 @@ export default function Builder() {
 
   return (
     <div className="pt-28 md:pt-40 pb-32 lg:pb-24">
+      <Seo
+        title="Build Your Own Juice"
+        description="Create your own custom cold-pressed juice or smoothie. Pick your fruit and vegetables and we press it fresh — your blend, your way, in Bracknell."
+        path="/builder"
+      />
       {/* Toast keyframes moved into index.css — see .js-toast utility */}
 
       <div className="max-w-7xl mx-auto px-5 md:px-10">

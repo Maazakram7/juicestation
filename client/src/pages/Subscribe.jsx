@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Seo from '../components/Seo';
 import {
   SUBSCRIPTION_TIERS,
   SUBSCRIPTION_BENEFITS,
@@ -92,6 +93,11 @@ export default function Subscribe() {
 
   return (
     <div className="pt-32 md:pt-40 pb-24">
+      <Seo
+        title="Weekly Juice Subscription & Delivery"
+        description="Fresh cold-pressed juice delivered to your door every week across Bracknell, Wokingham and surrounding areas (RG12, RG40, RG42). Pressed Sunday, delivered Monday. Pause, skip or cancel any time — no fees."
+        path="/subscribe"
+      />
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         {/* Hero */}
         <motion.div

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { ONE_OFF_MIN_ORDER } from '../data/subscriptions';
+import Seo from '../components/Seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -72,6 +73,7 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="pt-40 pb-24 px-6 text-center max-w-xl mx-auto">
+        <Seo title="Checkout" path="/checkout" noindex />
         <div className="text-6xl mb-6 opacity-30" aria-hidden="true">🧃</div>
         <h1 className="font-display text-4xl mb-4">Cart's empty.</h1>
         <p className="text-muted mb-8">Add something before checking out.</p>
@@ -84,6 +86,7 @@ export default function Checkout() {
 
   return (
     <div className="pt-32 md:pt-40 pb-24">
+      <Seo title="Checkout" path="/checkout" noindex />
       <div className="max-w-6xl mx-auto px-6 md:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

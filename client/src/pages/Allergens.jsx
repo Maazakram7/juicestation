@@ -1,8 +1,14 @@
 import { motion } from 'framer-motion';
+import Seo from '../components/Seo';
 
 export default function Allergens() {
   return (
     <div className="pt-32 md:pt-40 pb-24">
+      <Seo
+        title="Allergen Information"
+        description="Allergen guidance for JUICEeSTATION juices, smoothies and protein shakes. Contact us before ordering if you have specific allergy concerns."
+        path="/allergens"
+      />
       <div className="max-w-3xl mx-auto px-6 md:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
